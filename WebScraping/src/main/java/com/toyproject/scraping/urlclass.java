@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class urlclass {
-	private String url = "https://kream.co.kr/products/10000";
+	private String tistoryUrl = "https://codegarden-farmjun.tistory.com/73";
 }
