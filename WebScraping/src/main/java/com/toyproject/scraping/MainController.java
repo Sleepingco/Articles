@@ -1,22 +1,19 @@
 package com.toyproject.scraping;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import com.toyproject.scraping.articleDAO;
-
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class MainController {
 	@Autowired
 	private articleDAO articleDAO;
 	@GetMapping("/")
+	@ResponseBody
 	public String home() {
 		//length : 배열의 길이 알려 할 때
 		//length() : 문자열의 길이를 알려 할 때
@@ -56,7 +53,6 @@ public class MainController {
             String hrefValue = jojolduDocument.selectFirst("#content > div.cover-thumbnail-2 > ul > li:nth-child(1) > a").attr("href");
             String hrefNum = hrefValue.replaceAll("/","");
             int hrefIndex = Integer.parseInt(hrefNum);
-            System.out.println(hrefValue);
             
 			for(int i = 0; i<hrefIndex; i++) {
 				//https://jojoldu.tistory.com/category?page=1의 첫번째 요소의 링크만큼
@@ -65,6 +61,8 @@ public class MainController {
 				try {
 					Document jojolduDocuments = Jsoup.connect(allUrl).get();
 					System.out.println(jojolduDocuments);
+					Elements titleDiv = jojolduDocuments.getElementsByTag("h1");
+					
 				} catch (Exception e ) {
 					System.out.println("ErrorMessage for scrap : "+e);
 				}
