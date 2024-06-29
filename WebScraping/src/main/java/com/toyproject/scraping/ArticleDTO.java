@@ -6,5 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ArticleDTO {
-	String originalPage;
+	String title;
+	String content;
+	String author;
+	String originalpage;
+	String creationdate;
 }

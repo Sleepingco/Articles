@@ -57,9 +57,9 @@ public class ArticleScrapService {
             ArticleDTO jojolduTopUrlDTO = articleDAO.jojoldulatesturl();
             if(jojolduTopUrlDTO == null) {
             	jojolduTopUrlDTO = new ArticleDTO();
-            	jojolduTopUrlDTO.setOriginalPage(urljojoldu);
+            	jojolduTopUrlDTO.setOriginalpage(urljojoldu);
             }
-            String jojolduLatestUrl = jojolduTopUrlDTO.getOriginalPage();
+            String jojolduLatestUrl = jojolduTopUrlDTO.getOriginalpage();
     		if(!jojolduLatestUrl.equals(jojolduNewHref)) {
     			for(int idx = 1; idx<=jojolduHrefIdx; idx++) {
     				//https://jojoldu.tistory.com/category?page=1의 첫번째 요소의 링크만큼
@@ -93,8 +93,8 @@ public class ArticleScrapService {
     		            	String finContent = processedContent.toString();
     		                String author = authorDiv.text();
     		                String creationdate = creationdateDiv.text();
-
-    		                articleDAO.savearticle(title, finContent, author, jojolduCurUrl, creationdate);
+    		                String blogName = "티스토리";
+    		                articleDAO.savearticle(title, finContent, author, jojolduCurUrl, creationdate, blogName);
     					} else {
     						System.out.println("Element not found at index: " + idx);
     						continue;
