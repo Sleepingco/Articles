@@ -17,8 +17,10 @@ public class MainController {
 	private ArticleDAO articleDAO;
 	@SuppressWarnings("unchecked")
 	@GetMapping("/")
-
-	public String home() {
+	@ResponseBody
+	public JSONArray home() {
+		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
+		ASS.jojolduCrawlAndSaveArticles();
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();
 		for(int i=0; i<alBoard.size();i++) {
@@ -29,7 +31,6 @@ public class MainController {
 			jo.put("creationdate", alBoard.get(i).getCreationdate());
 			ja.add(jo);
 		}
-		ja.toJSONString();
-		return "/ex";
+		return ja;
 	}
 }

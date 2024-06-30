@@ -13,7 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     		creationdate = #{param5},
     		site = #{param6}
 	</insert>
-	<select id="jojoldulatesturl" resultType="com.toyproject.scraping.ArticleDTO">
+	<select id="jojolduLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
 		select originalpage from articles ORDER BY postnum DESC LIMIT 1
 	</select>
 	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">

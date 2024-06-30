@@ -13,5 +13,4 @@ public class WebCrawlerScheduler {
         // 여기에 수행할 작업 로직 추가
         articleScrapService.jojolduCrawlAndSaveArticles();
     }
-
 }

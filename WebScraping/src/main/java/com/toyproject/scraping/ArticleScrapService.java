@@ -17,9 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleScrapService {
 	@Autowired
 	private ArticleDAO articleDAO;
-//	public ArticleScrapService(ArticleDAO articleDAO) {
-//		this.articleDAO = articleDAO;
-//	}
+	public ArticleScrapService(ArticleDAO articleDAO) {
+		this.articleDAO = articleDAO;
+	}
 	public void jojolduCrawlAndSaveArticles() {
 		LocalDateTime now = LocalDateTime.now();
 		//length : 배열의 길이 알려 할 때
@@ -51,20 +51,29 @@ public class ArticleScrapService {
 //            System.out.println(hrefValue);
 
             
-           
+			// 최신글 url 인덱스 및 최신글 url
             String jojolduHref = jojolduDocument.selectFirst("#content > div.cover-thumbnail-2 > ul > li:nth-child(1) > a").attr("href");
             String jojolduHrefNum = jojolduHref.replaceAll("/","");
             int jojolduHrefIdx = Integer.parseInt(jojolduHrefNum);
             String jojolduNewHref = urljojoldu+jojolduHrefNum;
-            System.out.println(jojolduNewHref);
-            ArticleDTO jojolduTopUrlDTO = articleDAO.jojoldulatesturl();
+            // DB내에 가장 최신글url
+            ArticleDTO jojolduTopUrlDTO = articleDAO.jojolduLatestUrl();
             if(jojolduTopUrlDTO == null) {
             	jojolduTopUrlDTO = new ArticleDTO();
             	jojolduTopUrlDTO.setOriginalpage(urljojoldu);
             }
-            String jojolduLatestUrl = jojolduTopUrlDTO.getOriginalpage();
-    		if(!jojolduLatestUrl.equals(jojolduNewHref)) {
-    			for(int idx = 1; idx<=jojolduHrefIdx; idx++) {
+            String jojolduTopUrl = jojolduTopUrlDTO.getOriginalpage();
+            String jojolduTopUrlIdx = jojolduTopUrl;
+            jojolduTopUrlIdx = jojolduTopUrl.substring(jojolduTopUrl.lastIndexOf("/") + 1);
+            int jojolduLatestUrlIdxInt = 0;
+            if (jojolduTopUrlIdx != null && !jojolduTopUrlIdx.isEmpty()) {
+                jojolduLatestUrlIdxInt = Integer.parseInt(jojolduTopUrlIdx);
+            } else {
+                System.out.println("URL이 null이거나 비어 있습니다.");
+            }
+
+    		if(!jojolduTopUrl.equals(jojolduNewHref)) {
+    			for(int idx = jojolduLatestUrlIdxInt+1; idx<=jojolduHrefIdx; idx++) {
     				//https://jojoldu.tistory.com/category?page=1의 첫번째 요소의 링크만큼
     				Thread.sleep(3000);
     				String jojolduCurUrl = urljojoldu + idx;
@@ -80,7 +89,6 @@ public class ArticleScrapService {
     						if (contentDiv != null) {
     							StringBuilder contentBuilder = new StringBuilder();
     							processedContent = ContentFilter_jojoldu.extractContent(contentDiv, contentBuilder);
-    							System.out.println(processedContent);
     			            } else {
     			                System.out.println("Content div not found");
     			            }
