@@ -17,7 +17,7 @@ public class MainController {
 	private ArticleDAO articleDAO;
 	@SuppressWarnings("unchecked")
 	@GetMapping("/")
-	@ResponseBody
+
 	public String home() {
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();

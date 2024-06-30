@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleScrapService {
 	@Autowired
 	private ArticleDAO articleDAO;
+//	public ArticleScrapService(ArticleDAO articleDAO) {
+//		this.articleDAO = articleDAO;
+//	}
 	public void jojolduCrawlAndSaveArticles() {
 		LocalDateTime now = LocalDateTime.now();
 		//length : 배열의 길이 알려 할 때
