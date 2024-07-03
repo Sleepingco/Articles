@@ -19,8 +19,10 @@ public class MainController {
 	@GetMapping("/")
 	@ResponseBody
 	public JSONArray home() {
-		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
-		ASS.jojolduCrawlAndSaveArticles();
+//		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
+//		ASS.jojolduCrawlAndSaveArticles();
+		SeleniumLinkedin test = new SeleniumLinkedin(articleDAO);
+		test.JojolduSeleniumLinkedin();
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();
 		for(int i=0; i<alBoard.size();i++) {

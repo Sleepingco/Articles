@@ -11,7 +11,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     		author = #{param3},
     		originalpage = #{param4},
     		creationdate = #{param5},
-    		site = #{param6}
+    		site = #{param6},
+    		name = #{param7}
 	</insert>
 	<select id="jojolduLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
 		select originalpage from articles ORDER BY postnum DESC LIMIT 1

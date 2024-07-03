@@ -92,20 +92,18 @@ public class ArticleScrapService {
     			            } else {
     			                System.out.println("Content div not found");
     			            }
-    						
     			            // 작성자
     						Element authorDiv = jojolduDocuments.selectFirst(".author");           
     			            // 작성일자
     						Element creationdateDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > span.meta > span.date");
-    						
-
     						// text 추출
     		            	String title = titleDiv.text();
     		            	String finContent = processedContent.toString();
     		                String author = authorDiv.text();
     		                String creationdate = creationdateDiv.text();
     		                String blogName = "티스토리";
-    		                articleDAO.savearticle(title, finContent, author, jojolduCurUrl, creationdate, blogName);
+    		                String name = "이동욱";
+    		                articleDAO.savearticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, name);
     					} else {
     						System.out.println("Element not found at index: " + idx);
     						continue;
@@ -113,7 +111,7 @@ public class ArticleScrapService {
     				}catch (IOException e) {
     			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());
     			        continue;
-    				} catch (Exception e ) {
+    				} catch (Exception e) {
     					System.out.println("ErrorMessage for scrap : "+e);
     					continue;
     				}
@@ -123,10 +121,7 @@ public class ArticleScrapService {
 			LocalDateTime later = LocalDateTime.now();
 			long millisDifference = Duration.between(now, later).toMillis();
 			log.info("end");
-			System.out.println("code took "+millisDifference+"ms");
-
-            
-//			
+			System.out.println("code took "+millisDifference+"ms");		
 //			// 제목 
 //			Elements titleDiv = document.getElementsByTag("h1");
 //			// 본문 내용 class에 첫번째 요소를 가져옴
@@ -135,7 +130,6 @@ public class ArticleScrapService {
 //            Element authorDiv= document.selectFirst("#sidebar > div > div:nth-child(1) > div > div.text-h-400.text-sm");           
 //            // 작성일자
 //            Elements creationdateDiv = document.getElementsByTag("time");
-
 		} catch (Exception e ) {
 			System.out.println("ErrorMessage for Connect : "+e);
 		}

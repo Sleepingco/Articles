@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class WebCrawlerScheduler {
 	@Autowired
 	private ArticleScrapService articleScrapService;
-	
 	@Scheduled(cron = "0 0 4 * * ?")
     public void executeTask() {
         System.out.println("Task executed at 4 AM every day");
