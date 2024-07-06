@@ -42,15 +42,6 @@ public class ArticleScrapService {
             
 			//헤더 없음
 			Document jojolduDocument = Jsoup.connect(urljojoldu).get();
-            
-            //최신글 인덱스 알아내기
-//            Element urlIndex = jojolduDocument.selectFirst("#content > div.cover-thumbnail-2 > ul > li:nth-child(1) > a");
-//            String hrefValue = urlIndex.attr("href");
-//            String hrefNum = hrefValue.replaceAll("/","");
-//            int hrefIndex = Integer.parseInt(hrefNum);
-//            System.out.println(hrefValue);
-
-            
 			// 최신글 url 인덱스 및 최신글 url
             String jojolduHref = jojolduDocument.selectFirst("#content > div.cover-thumbnail-2 > ul > li:nth-child(1) > a").attr("href");
             String jojolduHrefNum = jojolduHref.replaceAll("/","");
@@ -103,7 +94,7 @@ public class ArticleScrapService {
     		                String creationdate = creationdateDiv.text();
     		                String blogName = "티스토리";
     		                String name = "이동욱";
-    		                articleDAO.savearticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, name);
+    		                articleDAO.saveTistoryArticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, name);
     					} else {
     						System.out.println("Element not found at index: " + idx);
     						continue;
@@ -122,14 +113,6 @@ public class ArticleScrapService {
 			long millisDifference = Duration.between(now, later).toMillis();
 			log.info("end");
 			System.out.println("code took "+millisDifference+"ms");		
-//			// 제목 
-//			Elements titleDiv = document.getElementsByTag("h1");
-//			// 본문 내용 class에 첫번째 요소를 가져옴
-//            Element contentDiv = document.selectFirst(".tt_article_useless_p_margin.contents_style");
-//            // 작성자
-//            Element authorDiv= document.selectFirst("#sidebar > div > div:nth-child(1) > div > div.text-h-400.text-sm");           
-//            // 작성일자
-//            Elements creationdateDiv = document.getElementsByTag("time");
 		} catch (Exception e ) {
 			System.out.println("ErrorMessage for Connect : "+e);
 		}

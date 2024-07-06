@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">	
 
 <mapper namespace="com.toyproject.scraping.ArticleDAO">
-	<insert id="savearticle">
+	<insert id="saveTistoryArticle">
 		insert into articles set
 			title = #{param1},
     		content = #{param2},
@@ -13,6 +13,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     		creationdate = #{param5},
     		site = #{param6},
     		name = #{param7}
+	</insert>
+	<insert id="saveLinkedinArticle">
+		insert into articles set
+			author = #{param1},
+			content = #{param2},
+			name = #{param3},
+			originalpage = #{param4}
 	</insert>
 	<select id="jojolduLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
 		select originalpage from articles ORDER BY postnum DESC LIMIT 1
