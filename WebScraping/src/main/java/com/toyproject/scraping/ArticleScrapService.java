@@ -25,7 +25,7 @@ public class ArticleScrapService {
 		//length : 배열의 길이 알려 할 때
 		//length() : 문자열의 길이를 알려 할 때
 		//size() : Collection, 자료구조의 크기를 알려 할 때
-		urlclass myurl = new urlclass();
+		UrlManager myurl = new UrlManager();
 		String urljojoldu = myurl.getJojolduTistoryUrl();
 		try {
 //			//헤더 지정
@@ -97,14 +97,14 @@ public class ArticleScrapService {
     		                articleDAO.saveTistoryArticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, name);
     					} else {
     						System.out.println("Element not found at index: " + idx);
-    						continue;
+    						
     					}
     				}catch (IOException e) {
     			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());
-    			        continue;
+    			        
     				} catch (Exception e) {
     					System.out.println("ErrorMessage for scrap : "+e);
-    					continue;
+    					
     				}
     			}
     		}
