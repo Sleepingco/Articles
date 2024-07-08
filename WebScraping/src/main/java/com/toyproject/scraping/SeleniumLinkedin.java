@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -19,6 +20,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,81 +67,91 @@ public class SeleniumLinkedin {
 		UrlManager manager = new UrlManager();
 		Map<String, String> allUrls = manager.getAllUrls();
         login.loginToLinkedIn();
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         int cnt = 0;
-        for (Map.Entry<String, String> entry : allUrls.entrySet()) {
-        	String urls = entry.getValue();
-			driver.get(urls);  // 무한 스크롤이 적용된 페이지 URL
-			JavascriptExecutor js = (JavascriptExecutor) driver;
-			
-			while (true) {
-				 // 현재 페이지의 높이를 저장
-			    long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
-			    
-			    // 페이지의 하단으로 스크롤
-			    js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-			    try {
-			        Thread.sleep(2000); 
-			    } catch (InterruptedException e) {
-			        Thread.currentThread().interrupt(); // 인터럽트 상태 복원
-			        System.err.println("스레드가 중단되었습니다: " + e.getMessage());
-			    }
-			    // 스크롤 후 페이지 높이를 확인
-			    long newHeight = (long) js.executeScript("return document.body.scrollHeight");
-			    if (newHeight == lastHeight) {
-			        break; // 더 이상 로드되는 콘텐츠가 없으면 반복 종료
-			    }
-			}
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span")));
-			try {
-				// 내용이 담겨있는 div 하나
-			    List<WebElement> divs = driver.findElements(By.cssSelector("#fie-impression-container"));
-			    Collections.reverse(divs);
-			    if (divs.isEmpty()) {
-			        System.out.println("No divs found.");
-			    } else {
-			    	// 각요소 추출 글쓴이, 내용 등등..
-			        for (WebElement div : divs) {
-			        	String content  = null;
-			        	String originalPage = null;
-			        	try {
-			        		// 컨텐츠 와 내부에 링크 알아내기
-			        		System.out.println("컨텐츠 와 내부에 링크 알아내기");
-			        		String htmlContent = div.findElement(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span > span")).getAttribute("innerHTML");
-			        		Document doc = Jsoup.parseBodyFragment(htmlContent);
-			        		content = doc.text();
-			        		
-			        		// 컨텐츠 내부에 링크 박스를 알아내기
-			        		System.out.println("컨텐츠 내부에 링크 박스를 알아내기");
-			        		content += " "+getLinkBoxSafe(div);
+        try {
+        	for (Map.Entry<String, String> entry : allUrls.entrySet()) {
+            	String urls = entry.getValue();
+    			driver.get(urls);  // 무한 스크롤이 적용된 페이지 URL
+    			
+    			 // 처음에 페이지의 상태가 완전히 로드될 때까지 기다립니다.
+                wait.until(webDriver -> js.executeScript("return document.readyState").equals("complete"));
 
-			        		// 원본 url 복사
-			        		System.out.println("원본 url 복사");
-			        		originalPage = clikToCopyLink(div, wait, driver);
-			        	} catch(NoSuchElementException e) {
-			        		System.out.println("can't find element <<<<<<<<<<<<<<<<<<<<: "+e);
-			        	}
-			        	
-			        	WebElement name = driver.findElement(By.tagName("h3"));
-			        	String nameText = entry.getKey();
-			        	String authors = name.getText();
-			            String siteName = "링크드인";
-			            System.out.println("author is :"+authors);
-			            System.out.println("content is : "+content);
-			            System.out.println("name is : "+ nameText);
-			            System.out.println("url is : "+ originalPage);
-			            articleDAO.saveLinkedinArticle(authors, content, nameText, originalPage, siteName);
-			            cnt++;
-			        }
-			    }
-			} catch (Exception e) {
-			    System.err.println("An error occurred: " + e.getMessage());
-			    e.printStackTrace();
-			}
-			
+                AtomicLong lastHeight = new AtomicLong((long) js.executeScript("return document.body.scrollHeight"));
+
+    			while (true) {
+    				 
+    			    // 페이지의 하단으로 스크롤
+    			    js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+    			    
+    			    // 페이지가 로드되고 새 콘텐츠가 나타날 때까지 기다립니다.
+                    wait.until(webDriver -> js.executeScript("return document.body.scrollHeight > " + lastHeight));
+    			    try {
+    			        Thread.sleep(2000); 
+    			    } catch (InterruptedException e) {
+    			        Thread.currentThread().interrupt(); // 인터럽트 상태 복원
+    			        System.err.println("스레드가 중단되었습니다: " + e.getMessage());
+    			    }
+    			    long newHeight = (long) js.executeScript("return document.body.scrollHeight");
+    			    if (newHeight == lastHeight.get()) {
+    			        break; // 더 이상 로드되는 콘텐츠가 없으면 반복을 종료합니다.
+    			    }
+    			    lastHeight.set(newHeight);
+    			}
+    			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span")));
+//    			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+//    			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span")));
+    			try {
+    				// 내용이 담겨있는 div 하나
+    			    List<WebElement> divs = driver.findElements(By.cssSelector("#fie-impression-container"));
+    			    Collections.reverse(divs);
+    			    if (divs.isEmpty()) {
+    			        System.out.println("No divs found.");
+    			    } else {
+    			    	// 각요소 추출 글쓴이, 내용 등등..
+    			        for (WebElement div : divs) {
+    			        	wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span")));
+    			        	String content  = null;
+    			        	String originalPage = null;
+    			        	try {
+    			        		// 컨텐츠 와 내부에 링크 알아내기
+    			        		System.out.println("컨텐츠 와 내부에 링크 알아내기");
+    			        		String htmlContent = div.findElement(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span > span")).getAttribute("innerHTML");
+    			        		Document doc = Jsoup.parseBodyFragment(htmlContent);
+    			        		content = doc.text();
+    			        		
+    			        		// 컨텐츠 내부에 링크 박스를 알아내기
+    			        		content += " "+getLinkBoxSafe(div);
+
+    			        		// 원본 url 복사
+    			        		originalPage = clikToCopyLink(div, wait, driver);
+    			        	} catch(NoSuchElementException e) {
+    			        		System.out.println("can't find element <<<<<<<<<<<<<<<<<<<<: "+e);
+    			        	}
+    			        	
+    			        	WebElement name = driver.findElement(By.tagName("h3"));
+    			        	String nameText = entry.getKey();
+    			        	String authors = name.getText();
+    			            String siteName = "링크드인";
+    			            System.out.println("author is :"+authors);
+    			            System.out.println("content is : "+content);
+    			            System.out.println("name is : "+ nameText);
+    			            System.out.println("url is : "+ originalPage);
+    			            articleDAO.saveLinkedinArticle(authors, content, nameText, originalPage, siteName);
+    			            cnt++;
+    			        }
+    			    }
+    			} catch (Exception e) {
+    			    System.err.println("An error occurred: " + e.getMessage());
+    			    e.printStackTrace();
+    			}
+            }
+        }finally {
+        	System.out.println("count is :" +cnt);
+            driver.quit();
         }
-        System.out.println("count is :" +cnt);
-        driver.quit();
+        
 
 	}
 		
