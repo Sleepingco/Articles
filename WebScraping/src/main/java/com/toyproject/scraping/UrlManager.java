@@ -11,9 +11,15 @@ public class UrlManager {
 	private Map<String, String> careelyUrls;
 	private String jojolduTistoryUrl = "https://jojoldu.tistory.com/";
 	
+	// 생성자에서 초기화
+    public UrlManager() {
+        careelyUrlManager();
+        linkedinUrlManager();
+    }
+    
 	public void careelyUrlManager() {
 		careelyUrls = new HashMap<>();
-		careelyUrls.put("한기용", "https://careerly.co.kr/@totuworld?fa=search-result&fromArea=tab-all&queryId=32808631cb31e7c2d2de21cc948d5f4e&objectId=127914-64389");
+		careelyUrls.put("한기용", "https://careerly.co.kr/profiles/669213");
 		careelyUrls.put("송요창", "https://careerly.co.kr/@totuworld?fa=search-result&fromArea=tab-all&queryId=32808631cb31e7c2d2de21cc948d5f4e&objectId=127914-64389");
 		careelyUrls.put("하조은", "https://careerly.co.kr/@hajoeun?fa=search-result&fromArea=tab-all&queryId=4d20f1358132e887c83258f1a29cf98e&objectId=16453-101915");
 	}

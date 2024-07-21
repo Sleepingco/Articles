@@ -4,6 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">	
 
 <mapper namespace="com.toyproject.scraping.ArticleDAO">
+	<!-- 아티클 저장 -->
 	<insert id="saveTistoryArticle">
 		insert into articles set
 			title = #{param1},
@@ -23,13 +24,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			originalpage = #{param4},
 			site = #{param5}
 	</insert>
-	
-	<select id="jojolduLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
-		select originalpage from articles ORDER BY postnum DESC LIMIT 1
+	<!-- 최신 url 불러오기 -->
+	<!-- 이동욱 티스토리 -->
+	<!-- <select id="jojolduLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
+		select originalpage from articles where site="티스토리" and name = "이동욱" ORDER BY postnum DESC LIMIT 1;
 	</select>
 	
+	 링크드인
 	<select id="linkedinLatestUrl" resultType="com.toyproject.scraping.ArticleDTO">
-		select originalpage from articles  where name = {param1} ORDER BY postnum DESC LIMIT 1;
+		select originalpage from articles  where name = {param1} and site ="링크드인" ORDER BY postnum DESC LIMIT 1;
+	</select> -->
+	<select id="getNewestUrl" resultType="com.toyproject.scraping.ArticleDTO">
+		select originalpage from articles where name = #{param1} and site = #{param2} ORDER BY postnum DESC LIMIT 1;
 	</select>
 	
 	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">

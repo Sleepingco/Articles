@@ -23,14 +23,14 @@ public class MainController {
 //		//이동욱 티스토리
 //		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
 //		ASS.jojolduCrawlAndSaveArticles();
-		
+//		
 //		//링크드인
-//		SeleniumLinkedin test = new SeleniumLinkedin(articleDAO);
-//		test.ScrapLinkedinSelenium();
-		
-		//커리어리
-		CareelySelenium test = new CareelySelenium(articleDAO);
-		test.ScrapCareelySelenium();
+		SeleniumLinkedin test = new SeleniumLinkedin(articleDAO);
+		test.ScrapLinkedinSelenium();
+//		
+//		//커리어리
+//		CareelySelenium test = new CareelySelenium(articleDAO);
+//		test.ScrapCareelySelenium();
 		
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();

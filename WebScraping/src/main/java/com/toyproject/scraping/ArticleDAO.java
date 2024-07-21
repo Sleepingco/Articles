@@ -7,8 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface ArticleDAO {
 	void saveTistoryArticle(String title, String finContent, String author, String originalPage, String creationdate, String blogName, String name);
-	void saveLinkedinArticle(String author, String Content, String name, String originalpage, String siteName);
-	ArticleDTO jojolduLatestUrl(); 
+	void saveLinkedinArticle(String author, String Content, String name, String originalpage, String siteName); 
 	ArrayList<ArticleDTO> getArticleList();
-
+	
+	ArticleDTO getNewestUrl(String name,String site);
 }
