@@ -54,9 +54,9 @@ public class ArticleScrapService {
             String jojolduNewHref = urljojoldu+jojolduHrefNum;
             
             // DB내에 가장 최신글url db에 데이터가 없을때 기본 url로 지정
-            String testName  = "이동욱";
+            int testId  = 1;
 			String testSite = "티스토리";			
-            ArticleDTO jojolduTopUrlDTO = articleDAO.getNewestUrl(testName,testSite);
+            ArticleDTO jojolduTopUrlDTO = articleDAO.getNewestUrl(testId,testSite);
             if(jojolduTopUrlDTO == null) {
             	jojolduTopUrlDTO = new ArticleDTO();
             	jojolduTopUrlDTO.setOriginalpage(urljojoldu);
@@ -107,8 +107,8 @@ public class ArticleScrapService {
             		                String author = authorDiv.text();
             		                String creationdate = creationdateDiv.text();
             		                String blogName = "티스토리";
-            		                String name = "이동욱";
-            		                articleDAO.saveTistoryArticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, name);
+            		                int id = 1;
+            		                articleDAO.saveTistoryArticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, id);
             					} else {
             						System.out.println("Element not found at index: " + idx);
             						

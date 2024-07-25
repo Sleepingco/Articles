@@ -54,22 +54,25 @@ public class SeleniumLinkedin {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
 		WebDriver driver = new ChromeDriver(options);
+		// 로그인 호출
 		LinkedInLoginAutomation login = new LinkedInLoginAutomation(driver);
+		login.loginToLinkedIn();
+		// 인물별 url 호출
 		UrlManager manager = new UrlManager();
-		Map<String, String> allUrls = manager.getLinkedinUrls();
-        login.loginToLinkedIn();
+		Map<Integer, String> allUrls = manager.getLinkedinUrls();
+        
         int cnt = 0;
-        for (Map.Entry<String, String> entry : allUrls.entrySet()) {
+        for (Map.Entry<Integer, String> entry : allUrls.entrySet()) {
         	String urls = entry.getValue();
 			driver.get(urls);  // 무한 스크롤이 적용된 페이지 URL
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 			JavascriptExecutor js = (JavascriptExecutor) driver;
 			
 			//최신글 비교
-			String testName  = entry.getKey();
-			System.out.println(testName+" here is your name?");
+			int testId  = entry.getKey();
+			
 			String testSite = "링크드인";
-			ArticleDTO linkDTO= articleDAO.getNewestUrl(testName,testSite);
+			ArticleDTO linkDTO= articleDAO.getNewestUrl(testId,testSite);
 			if(linkDTO == null) {
 				linkDTO = new ArticleDTO();
 				linkDTO.setOriginalpage(urls);
@@ -81,6 +84,7 @@ public class SeleniumLinkedin {
 			String  newestLink = clikToCopyLink(testDiv,wait);
 			if(!dbNewestLink.equals(newestLink)) {
 				System.out.println("it's time to scrap");
+
 				while (true) {
 					 // 현재 페이지의 높이를 저장
 				    long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
@@ -100,6 +104,7 @@ public class SeleniumLinkedin {
 				        break; // 더 이상 로드되는 콘텐츠가 없으면 반복 종료
 				    }
 				}
+
 //				wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span")));
 				
 				try {
@@ -126,15 +131,15 @@ public class SeleniumLinkedin {
 				        	}
 				        	
 				        	WebElement name = driver.findElement(By.tagName("h3"));
-				        	String nameText = entry.getKey();
+				        	int id = entry.getKey();
 				        	String authors = name.getText();
 				            String siteName = "링크드인";
 				            System.out.println("author is :"+authors);
 				            System.out.println("content is : "+content);
-				            System.out.println("name is : "+ nameText);
+				            
 				            System.out.println("url is : "+ originalPage);
 	  
-				            articleDAO.saveLinkedinArticle(authors, content, nameText, originalPage, siteName);
+				            articleDAO.saveLinkedinArticle(authors, content, id, originalPage, siteName);
 				            cnt++;
 				            System.out.println("count is :" +cnt);
 				        }

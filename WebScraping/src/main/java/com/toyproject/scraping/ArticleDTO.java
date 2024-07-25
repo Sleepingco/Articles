@@ -12,4 +12,5 @@ public class ArticleDTO {
 	String originalpage;
 	String creationdate;
 	String site;
+	String name;
 }

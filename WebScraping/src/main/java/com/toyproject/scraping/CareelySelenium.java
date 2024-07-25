@@ -48,8 +48,8 @@ public class CareelySelenium {
 		
 		// url 불러오기
 		UrlManager manager = new UrlManager();
-		Map<String, String> allUrls = manager.getCareelyUrls();
-		for (Map.Entry<String, String> entry : allUrls.entrySet()) {
+		Map<Integer, String> allUrls = manager.getCareelyUrls();
+		for (Map.Entry<Integer, String> entry : allUrls.entrySet()) {
 			// url 이동
 			String urls = entry.getValue();
 			driver.get(urls);
@@ -65,7 +65,7 @@ public class CareelySelenium {
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 			
 			// 게시물 버튼 클릭
-			WebElement postBtn  =driver.findElement(By.cssSelector("#__next > div > div.css-1yctryj-SkeletonTheme > div.tw-bg-color-white.tw-relative.tw-min-h-screen > div:nth-child(3) > div > ul > li:nth-child(2) > button"));
+			WebElement postBtn = driver.findElement(By.cssSelector("#__next > div > div.css-1yctryj-SkeletonTheme > div.tw-bg-color-white.tw-relative.tw-min-h-screen > div:nth-child(3) > div > ul > li:nth-child(2) > button"));
 			postBtn.click();
 			// 페이지 맨아래 스크롤
 			while (true) {			 
@@ -93,22 +93,40 @@ public class CareelySelenium {
 				int classCount = driver.findElements(By.cssSelector(".tw-flex.tw-justify-between.tw-items-center.tw-gap-3.tw-p-4")).size();
 				System.out.println("class Count = " + classCount);
 				classCount = classCount*2-1;
-				for(int divCnt = 1;divCnt<=classCount;divCnt+=2 ) {
-					List<WebElement> divs = driver.findElements(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+ divCnt +") > div"));
-					Collections.reverse(divs);
-					System.out.println(divCnt);
-					if (divs.isEmpty()) {
-				        System.out.println("No divs found.");
-				    } else {
-				    	// 스크랩 추가
-				    	for (WebElement div : divs) {
-				    		
-				    	}
-				    }
+				
+				String author = driver.findElement(By.tagName("h1")).getText();
+				String site = "커리어리";
+				
+				for(int divCnt = classCount; divCnt>=1; divCnt-=2) {
+					
+					WebElement div = driver.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+ divCnt +") > div"));
+					
+					
+					js.executeScript(
+					        "const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);" +
+					        "const elementTop = arguments[0].getBoundingClientRect().top;" +
+					        "const offset = elementTop - viewPortHeight / 2;" +
+					        "window.scroll({top: window.pageYOffset + offset, behavior: 'smooth'});",
+					        div);
+			    	// 스크랩 추가
+					
+					WebElement more = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
+					more.click();
+					
+					String title = div.findElement(By.cssSelector(".tw-mb-6.tw-font-bold")).getText();
+					String content = div.findElement(By.cssSelector(".ProseMirror.auto-line-break.tw-text-base.tw-text-color-slate-900.tw-whitespace-pre-wrap")).getText();
+					String originalPage = "https://careerly.co.kr"+div.findElement(By.cssSelector(".tw-text-xs.tw-text-slate-500.hover:tw-underline.hover:tw-underline-offset-2")).getAttribute("href");
+					int id = entry.getKey();
+					Thread.sleep(500);
+				    System.out.println("제목 : "+title);
+				    System.out.println("컨텐츠 : "+content);
+				    System.out.println("작성자 : "+author);
+				    System.out.println("사이트 : "+originalPage);
+//				    articleDAO.saveCareelyArticle(title,content,author,site,id);
 				}
 				
 			} catch(Exception e) {
-				System.out.println("count failure");
+				System.out.println("count failure : " + e);
 			}
 			
 		}
