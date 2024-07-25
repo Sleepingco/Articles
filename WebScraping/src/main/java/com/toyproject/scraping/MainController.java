@@ -17,8 +17,21 @@ public class MainController {
 	private ArticleDAO articleDAO;
 	@SuppressWarnings("unchecked")
 	@GetMapping("/")
-
-	public String home() {
+	@ResponseBody
+	public JSONArray home() {
+		
+//		//이동욱 티스토리
+//		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
+//		ASS.jojolduCrawlAndSaveArticles();
+//		
+//		//링크드인
+//		SeleniumLinkedin test = new SeleniumLinkedin(articleDAO);
+//		test.ScrapLinkedinSelenium();
+//		
+//		//커리어리
+		CareelySelenium test = new CareelySelenium(articleDAO);
+		test.ScrapCareelySelenium();
+		
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();
 		for(int i=0; i<alBoard.size();i++) {
@@ -29,7 +42,6 @@ public class MainController {
 			jo.put("creationdate", alBoard.get(i).getCreationdate());
 			ja.add(jo);
 		}
-		ja.toJSONString();
-		return "/ex";
+		return ja;
 	}
 }

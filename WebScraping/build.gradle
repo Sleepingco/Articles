@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.seleniumhq.selenium:selenium-java:4.1.0'
     implementation 'net.lightbody.bmp:browsermob-core:2.1.5'
 	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+	implementation 'org.seleniumhq.selenium:selenium-java:4.1.2'
 }
 
 tasks.named('test') {

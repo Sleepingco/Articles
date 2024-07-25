@@ -11,4 +11,6 @@ public class ArticleDTO {
 	String author;
 	String originalpage;
 	String creationdate;
+	String site;
+	String name;
 }
