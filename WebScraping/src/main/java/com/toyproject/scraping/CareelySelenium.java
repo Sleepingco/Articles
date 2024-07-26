@@ -22,7 +22,10 @@ public class CareelySelenium {
 		this.articleDAO = articleDAO;
 	}
 	public void ScrapCareelySelenium() {
-		System.setProperty("webdriver.chrome.driver", "F:\\SHP\\PersonalProject\\WebScraping\\WebScraping\\chromedriver-win64\\chromedriver.exe");
+		// 윈도
+//		System.setProperty("webdriver.chrome.driver", "F:\\SHP\\PersonalProject\\WebScraping\\WebScraping\\chromedriver-win64\\chromedriver.exe");
+		// 맥 
+		System.setProperty("webdriver.chrome.driver", "/Users/parkseongho/git/WebScraping/WebScraping/chromedriver-mac-arm64/chromedriver");
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
 		WebDriver driver = new ChromeDriver(options);
@@ -31,7 +34,10 @@ public class CareelySelenium {
 		
 		// 로그인
 		try {
-			WebElement goLogin = driver.findElement(By.cssSelector("#__next > div > div.css-1yctryj-SkeletonTheme > nav > div > div.tw-flex.tw-relative.tw-items-center.tw-gap-1 > div:nth-child(2) > button"));
+			//윈
+//			WebElement goLogin = driver.findElement(By.cssSelector("#__next > div > div.css-1yctryj-SkeletonTheme > nav > div > div.tw-flex.tw-relative.tw-items-center.tw-gap-1 > div:nth-child(2) > button"));
+			// 맥
+			WebElement goLogin = driver.findElement(By.cssSelector("#__next > div > div.css-1yctryj-SkeletonTheme > nav > div > div.tw-flex.tw-relative.tw-items-center.tw-gap-1 > div:nth-child(1) > button"));
 			goLogin.click();
 			Thread.sleep(2000);
 	        WebElement username = driver.findElement(By.id("email"));
@@ -102,20 +108,24 @@ public class CareelySelenium {
 					WebElement div = driver.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+ divCnt +") > div"));
 					
 					
-					js.executeScript(
-					        "const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);" +
-					        "const elementTop = arguments[0].getBoundingClientRect().top;" +
-					        "const offset = elementTop - viewPortHeight / 2;" +
-					        "window.scroll({top: window.pageYOffset + offset, behavior: 'smooth'});",
-					        div);
-			    	// 스크랩 추가
+//					js.executeScript(
+//					        "const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);" +
+//					        "const elementTop = arguments[0].getBoundingClientRect().top;" +
+//					        "const offset = elementTop - viewPortHeight / 2;" +
+//					        "window.scroll({top: window.pageYOffset + offset, behavior: 'smooth'});",
+//					        div);
 					
-					WebElement more = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
-					more.click();
+					WebElement element = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
+					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", div);
+					element.click();
+					// 스크랩 추가
+					
+//					WebElement more = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
+//					more.click();
 					
 					String title = div.findElement(By.cssSelector(".tw-mb-6.tw-font-bold")).getText();
 					String content = div.findElement(By.cssSelector(".ProseMirror.auto-line-break.tw-text-base.tw-text-color-slate-900.tw-whitespace-pre-wrap")).getText();
-					String originalPage = "https://careerly.co.kr"+div.findElement(By.cssSelector(".tw-text-xs.tw-text-slate-500.hover:tw-underline.hover:tw-underline-offset-2")).getAttribute("href");
+					String originalPage = div.findElement(By.cssSelector(".tw-p-3.tw-flex.tw-flex-wrap.tw-justify-end.false")).getAttribute("href");
 					int id = entry.getKey();
 					Thread.sleep(500);
 				    System.out.println("제목 : "+title);
