@@ -8,9 +8,9 @@ import lombok.Setter;
 public class ArticleDTO {
 	String title;
 	String content;
-	String author;
 	String originalpage;
 	String creationdate;
 	String site;
 	String name;
+	int id;
 }

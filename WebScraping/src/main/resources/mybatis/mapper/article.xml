@@ -32,14 +32,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			site = #{param4},
 			id = #{param5}
 	</insert>
+	<update id="updateCareelyArticle">
+		UPDATE articles SET title = #{param1} , content = #{param2}, creationdate = #{param3} WHERE originalpage = #{param4} and id=#{param5};
+	</update>
 	<!-- 최신 url 불러오기 -->
 
 	<select id="getNewestUrl" resultType="com.toyproject.scraping.ArticleDTO">
 		select originalpage from articles where id = #{param1} and site = #{param2} ORDER BY postnum DESC LIMIT 1;
 	</select>
-	
+	<!-- url 여부 확인 -->
+	<select id="findArticleByIdentifier" resultType="com.toyproject.scraping.ArticleDTO">
+		select * from articles where originalpage= #{param1};
+	</select>
+	<!-- 전체 글 불러오기 -->
 	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">
-		select * from articles order by creationdate desc;
+		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT 10 OFFSET 0 ;
 	</select>
 	
 </mapper>

@@ -119,27 +119,33 @@ public class SeleniumLinkedin {
 				    	// 각요소 추출 글쓴이, 내용 등등..
 				        for (WebElement div : divs) {
 				        	scrollToElementCentered(driver, div);
-				        	String content  = null;
-				        	String originalPage = null;
 				        	try {
 				        		// 원본 url 복사
-				        		originalPage = clikToCopyLink(div, wait);
+				        		String originalPage = clikToCopyLink(div, wait);
 				        		// 컨텐츠 와 내부에 링크, 링크 박스 알아내기
-				        		content = getContent(div)+" "+getLinkBoxSafe(driver, div);
+				        		String content = getContent(div)+" "+getLinkBoxSafe(driver, div);
+				        		String date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.update-components-actor--with-control-menu.align-items-flex-start > div > div > span > span.visually-hidden")).getText();
+				        		int id = entry.getKey();
+					            String siteName = "링크드인";
+					            System.out.println("content is : "+content);
+					            System.out.println("date is : "+date);
+					            System.out.println("url is : "+ originalPage);
+					            
+					            ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage);
+					            if (articleDTO != null) {
+									// 기존 글 업데이트
+									articleDAO.updateLinkedinArticle(content,date,siteName,id);
+								} else {
+									// 새 글 삽입
+									articleDAO.saveLinkedinArticle(content, originalPage, date, siteName, id);
+								}
+					            
 				        	} catch(NoSuchElementException e) {
 				        		System.out.println("can't find element: "+e);
 				        	}
 				        	
-				        	WebElement name = driver.findElement(By.tagName("h3"));
-				        	int id = entry.getKey();
-				        	String authors = name.getText();
-				            String siteName = "링크드인";
-				            System.out.println("author is :"+authors);
-				            System.out.println("content is : "+content);
-				            
-				            System.out.println("url is : "+ originalPage);
-	  
-				            articleDAO.saveLinkedinArticle(authors, content, id, originalPage, siteName);
+				        	
+				        	
 				            cnt++;
 				            System.out.println("count is :" +cnt);
 				        }

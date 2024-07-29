@@ -18,19 +18,19 @@ public class MainController {
 	@SuppressWarnings("unchecked")
 	@GetMapping("/")
 	@ResponseBody
-	public JSONArray home() {
+	public JSONObject home() {
 		
 //		//이동욱 티스토리
-//		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
-//		ASS.jojolduCrawlAndSaveArticles();
+		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
+		ASS.jojolduCrawlAndSaveArticles();
 //		
 //		//링크드인
-//		SeleniumLinkedin test = new SeleniumLinkedin(articleDAO);
-//		test.ScrapLinkedinSelenium();
+		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
+		SLI.ScrapLinkedinSelenium();
 //		
 //		//커리어리
-		CareelySelenium test = new CareelySelenium(articleDAO);
-		test.ScrapCareelySelenium();
+		CareelySelenium CSI = new CareelySelenium(articleDAO);
+		CSI.ScrapCareelySelenium();
 		
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();
@@ -38,10 +38,17 @@ public class MainController {
 			JSONObject jo = new JSONObject();
 			jo.put("title", alBoard.get(i).getTitle());
 			jo.put("content", alBoard.get(i).getContent());
-			jo.put("author", alBoard.get(i).getAuthor());
 			jo.put("creationdate", alBoard.get(i).getCreationdate());
+			jo.put("site", alBoard.get(i).getSite());
+			jo.put("id", alBoard.get(i).getId());
+			jo.put("name", alBoard.get(i).getName());
 			ja.add(jo);
 		}
-		return ja;
+		JSONObject response = new JSONObject();
+	    response.put("code", 200);
+	    response.put("message", "ok");
+	    response.put("data", ja);
+	    
+		return response;
 	}
 }

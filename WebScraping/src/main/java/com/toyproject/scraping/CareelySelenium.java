@@ -22,10 +22,27 @@ public class CareelySelenium {
 		this.articleDAO = articleDAO;
 	}
 	public void ScrapCareelySelenium() {
-		// 윈도
-//		System.setProperty("webdriver.chrome.driver", "F:\\SHP\\PersonalProject\\WebScraping\\WebScraping\\chromedriver-win64\\chromedriver.exe");
-		// 맥 
-		System.setProperty("webdriver.chrome.driver", "/Users/parkseongho/git/WebScraping/WebScraping/chromedriver-mac-arm64/chromedriver");
+		// 현재 시스템의 OS 이름을 가져옵니다.
+        String osName = System.getProperty("os.name").toLowerCase();
+        System.out.println("Operating System: " + osName);
+
+        // OS에 따라 ChromeDriver 경로를 설정합니다.
+        if (osName.contains("win")) {
+            // 윈도우즈의 경우
+            System.setProperty("webdriver.chrome.driver", "F:\\SHP\\PersonalProject\\WebScraping\\WebScraping\\chromedriver-win64\\chromedriver.exe");
+            System.out.println("Windows ChromeDriver is set.");
+        } else if (osName.contains("mac")) {
+            // 맥OS의 경우
+        	System.setProperty("webdriver.chrome.driver", "/Users/parkseongho/git/WebScraping/WebScraping/chromedriver-mac-arm64/chromedriver");
+            System.out.println("Mac ChromeDriver is set.");
+        } else if (osName.contains("linux")) {
+            // 리눅스의 경우
+            System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+            System.out.println("Linux ChromeDriver is set.");
+        } else {
+            System.out.println("Your OS is not supported!");
+            // 지원되지 않는 운영체제일 경우, 추가적인 처리가 필요할 수 있습니다.
+        }
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
 		WebDriver driver = new ChromeDriver(options);
@@ -100,45 +117,44 @@ public class CareelySelenium {
 				System.out.println("class Count = " + classCount);
 				classCount = classCount*2-1;
 				
-				String author = driver.findElement(By.tagName("h1")).getText();
-				String site = "커리어리";
 				
 				for(int divCnt = classCount; divCnt>=1; divCnt-=2) {
 					
 					WebElement div = driver.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+ divCnt +") > div"));
-					
-					
-//					js.executeScript(
-//					        "const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);" +
-//					        "const elementTop = arguments[0].getBoundingClientRect().top;" +
-//					        "const offset = elementTop - viewPortHeight / 2;" +
-//					        "window.scroll({top: window.pageYOffset + offset, behavior: 'smooth'});",
-//					        div);
-					
-					WebElement element = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
+					// 더보기 누르기
+					WebElement more = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
 					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", div);
-					element.click();
-					// 스크랩 추가
-					
-//					WebElement more = div.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+divCnt+") > div > div:nth-child(2) > div > div > div > span > span"));
-//					more.click();
-					
+					more.click();
+					String site = "커리어리";
+					int id = entry.getKey();
 					String title = div.findElement(By.cssSelector(".tw-mb-6.tw-font-bold")).getText();
 					String content = div.findElement(By.cssSelector(".ProseMirror.auto-line-break.tw-text-base.tw-text-color-slate-900.tw-whitespace-pre-wrap")).getText();
+					String date = div.findElement(By.cssSelector(".tw-text-xs.tw-text-color-text-subtler")).getText();
 					String originalPage = div.findElement(By.cssSelector(".tw-p-3.tw-flex.tw-flex-wrap.tw-justify-end.false")).getAttribute("href");
-					int id = entry.getKey();
+					
+					
 					Thread.sleep(500);
 				    System.out.println("제목 : "+title);
 				    System.out.println("컨텐츠 : "+content);
-				    System.out.println("작성자 : "+author);
+				    System.out.println("작성일 : "+date);
 				    System.out.println("사이트 : "+originalPage);
-//				    articleDAO.saveCareelyArticle(title,content,author,site,id);
+				    
+					ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage,id);
+					if (articleDTO != null) {
+						// 기존 글 업데이트
+						articleDAO.updateCareelyArticle(title,content,date,site,id);
+					} else {
+						// 새 글 삽입
+						articleDAO.saveCareelyArticle(title,content,originalPage,date,site,id);
+					}
+					
+				    
 				}
 				
 			} catch(Exception e) {
 				System.out.println("count failure : " + e);
 			}
-			
+			driver.quit();
 		}
 		
 	}
