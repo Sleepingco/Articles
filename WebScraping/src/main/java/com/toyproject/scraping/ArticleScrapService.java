@@ -21,6 +21,7 @@ public class ArticleScrapService {
 		this.articleDAO = articleDAO;
 	}
 	public void jojolduCrawlAndSaveArticles() {
+		log.info("start");
 		LocalDateTime now = LocalDateTime.now();
 		//length : 배열의 길이 알려 할 때
 		//length() : 문자열의 길이를 알려 할 때
@@ -63,67 +64,62 @@ public class ArticleScrapService {
             }
             
             // DB에 가장 최신 URL에 인덱스를 추출하기위한 부분
-            String jojolduTopUrl = jojolduTopUrlDTO.getOriginalpage();
-//            String jojolduTopUrlIdx = jojolduTopUrl;
-//            jojolduTopUrlIdx = jojolduTopUrl.substring(jojolduTopUrl.lastIndexOf("/") + 1);
-//            int jojolduLatestUrlIdxInt = 0;
-//            if (jojolduTopUrlIdx != null && !jojolduTopUrlIdx.isEmpty()) {
-//                jojolduLatestUrlIdxInt = Integer.parseInt(jojolduTopUrlIdx);
-//            } else {
-//                System.out.println("URL이 null이거나 비어 있습니다.");
-//            }
-            
+            String jojolduTopUrl = jojolduTopUrlDTO.getOriginalpage();            
             if (jojolduTopUrl != null && !jojolduTopUrl.isEmpty()) {
                 String jojolduTopUrlIdx = jojolduTopUrl.substring(jojolduTopUrl.lastIndexOf("/") + 1);
+                if(jojolduTopUrlIdx ==null||jojolduTopUrlIdx.equals("")) {
+                	jojolduTopUrlIdx = "0";
+                }
                 try {
                     int jojolduLatestUrlIdxInt = Integer.parseInt(jojolduTopUrlIdx);
-                    if(!jojolduTopUrl.equals(jojolduNewHref)) {
-            			for(int idx = jojolduLatestUrlIdxInt+1; idx<=jojolduHrefIdx; idx++) {
-            				//https://jojoldu.tistory.com/category?page=1의 첫번째 요소의 링크만큼
-            				Thread.sleep(3000);
-            				String jojolduCurUrl = urljojoldu + idx;
-            				try {
-            					log.info("start");
-            					Document jojolduDocuments = Jsoup.connect(jojolduCurUrl).get();
-            					if (jojolduDocuments != null) {
-            						// 제목
-            						Element titleDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > h1");
-            						// 본문 내용 class에 첫번째 요소를 가져옴
-            						Element contentDiv = jojolduDocuments.selectFirst("#content > div > div.entry-content > div.contents_style");
-            						StringBuilder processedContent = new StringBuilder();
-            						if (contentDiv != null) {
-            							StringBuilder contentBuilder = new StringBuilder();
-            							processedContent = ContentFilter_jojoldu.extractContent(contentDiv, contentBuilder);
-            			            } else {
-            			                System.out.println("Content div not found");
-            			            }
-            			            // 작성자
-            						Element authorDiv = jojolduDocuments.selectFirst(".author");           
-            			            // 작성일자
-            						Element creationdateDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > span.meta > span.date");
-            						// text 추출
-            		            	String title = titleDiv.text();
-            		            	String finContent = processedContent.toString();
-            		                String author = authorDiv.text();
-            		                String creationdate = creationdateDiv.text();
-            		                String blogName = "티스토리";
-            		                int id = 1;
-            		                articleDAO.saveTistoryArticle(title, finContent, author, jojolduCurUrl, creationdate, blogName, id);
-            					} else {
-            						System.out.println("Element not found at index: " + idx);
-            						
-            					}
-            				}catch (IOException e) {
-            			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());
-            			        
-            				} catch (Exception e) {
-            					System.out.println("ErrorMessage for scrap : "+e);
-            					
-            				}
-            			}
-            		} else {
-            			System.out.println("더이상 최신글이 없습니다.");
-            		}
+                    
+        			for(int idx = 1; idx<=jojolduHrefIdx; idx++) {
+        				//https://jojoldu.tistory.com/category?page=1의 첫번째 요소의 링크만큼
+        				Thread.sleep(2000);
+        				String jojolduCurUrl = urljojoldu + idx;
+        				try {
+        					
+        					Document jojolduDocuments = Jsoup.connect(jojolduCurUrl).get();
+        					if (jojolduDocuments != null) {
+        						// 제목
+        						Element titleDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > h1");
+        						// 본문 내용 class에 첫번째 요소를 가져옴
+        						Element contentDiv = jojolduDocuments.selectFirst("#content > div > div.entry-content > div.contents_style");
+        						StringBuilder processedContent = new StringBuilder();
+        						if (contentDiv != null) {
+        							StringBuilder contentBuilder = new StringBuilder();
+        							processedContent = ContentFilter_jojoldu.extractContent(contentDiv, contentBuilder);
+        			            } else {
+        			                System.out.println("Content div not found");
+        			            }
+        			                    
+        			            // 작성일자
+        						Element creationdateDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > span.meta > span.date");
+        						// text 추출
+        		            	String title = titleDiv.text();
+        		            	String finContent = processedContent.toString();
+        		                String creationdate = creationdateDiv.text();
+        		                String blogName = "티스토리";
+        		                int id = 1;
+        		                if(idx<=jojolduLatestUrlIdxInt) {
+        		                	System.out.println("update exist article : " + idx);
+        		                	articleDAO.updateArticle(title,finContent,creationdate,jojolduCurUrl,id);
+        		                } else {
+        		                	System.out.println("insert new article : " + idx);
+        		                	articleDAO.saveArticle(title, finContent, jojolduCurUrl, creationdate, blogName, id);
+        		                }
+        		                
+        					} else {
+        						System.out.println("Element not found at index: " + idx);
+        					}
+        				}catch (IOException e) {
+        			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());
+        			        
+        				} catch (Exception e) {
+        					System.out.println("ErrorMessage for scrap : "+e);	
+        				}
+        			}
+            		
                 } catch (NumberFormatException e) {
                     System.out.println("URL의 마지막 부분이 숫자가 아닙니다: " + jojolduTopUrlIdx);
                 }
@@ -131,14 +127,10 @@ public class ArticleScrapService {
                 System.out.println("URL이 null이거나 비어 있습니다.");
             }
 
-            
-            
-    		
-
 			LocalDateTime later = LocalDateTime.now();
 			long millisDifference = Duration.between(now, later).toMillis();
 			log.info("end");
-			System.out.println("code took "+millisDifference+"ms");		
+			System.out.println("Tistory code took "+millisDifference+"ms");		
 		} catch (Exception e ) {
 			System.out.println("ErrorMessage for Connect : "+e);
 		}

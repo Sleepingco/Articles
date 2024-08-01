@@ -26,13 +26,14 @@ public class UrlManager {
     public void careelyUrlManager() {
 		careelyUrls = new HashMap<>();
 		careelyUrls.put(2, "https://careerly.co.kr/profiles/669213");
-//		careelyUrls.put(3, "https://careerly.co.kr/@totuworld");
-//		careelyUrls.put(4, "https://careerly.co.kr/@hajoeun");
+		careelyUrls.put(3, "https://careerly.co.kr/@totuworld");
+		careelyUrls.put(4, "https://careerly.co.kr/@hajoeun");
 	}
 	public void linkedinUrlManager() {
 		linkedinUrls = new HashMap<>();
 		linkedinUrls.put(1, "https://www.linkedin.com/in/%EB%8F%99%EC%9A%B1-%EC%9D%B4-575160177/recent-activity/all/");
 		linkedinUrls.put(3, "https://www.linkedin.com/in/totuworld/recent-activity/all/");
+		linkedinUrls.put(4, "https://careerly.co.kr/profiles/669213");
 	}
     
     // 모든 이름과 URL을 Map으로 반환하기

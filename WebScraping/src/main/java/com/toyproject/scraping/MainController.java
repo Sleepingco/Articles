@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,19 +19,19 @@ public class MainController {
 	@SuppressWarnings("unchecked")
 	@GetMapping("/")
 	@ResponseBody
-	public JSONObject home() {
+	public ResponseEntity<JSONObject> home() {
 		
 //		//이동욱 티스토리
-		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
-		ASS.jojolduCrawlAndSaveArticles();
-//		
+//		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
+//		ASS.jojolduCrawlAndSaveArticles();
+
 //		//링크드인
-		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
-		SLI.ScrapLinkedinSelenium();
+//		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
+//		SLI.ScrapLinkedinSelenium();
 //		
 //		//커리어리
-		CareelySelenium CSI = new CareelySelenium(articleDAO);
-		CSI.ScrapCareelySelenium();
+//		CareelySelenium CSI = new CareelySelenium(articleDAO);
+//		CSI.ScrapCareelySelenium();
 		
 		ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList();
 		JSONArray ja = new JSONArray();
@@ -44,11 +45,13 @@ public class MainController {
 			jo.put("name", alBoard.get(i).getName());
 			ja.add(jo);
 		}
-		JSONObject response = new JSONObject();
-	    response.put("code", 200);
-	    response.put("message", "ok");
-	    response.put("data", ja);
-	    
-		return response;
+		ApiResponse response = new ApiResponse(200, "ok", ja);
+        return ResponseEntity.ok(response.toJSON());
 	}
+//	@GetMapping("/summary")
+//	@ResponseBody
+//	public JSONObject summary() {
+//		articleDAO.
+//		return null;
+//	}
 }

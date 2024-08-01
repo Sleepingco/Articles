@@ -4,36 +4,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">	
 
 <mapper namespace="com.toyproject.scraping.ArticleDAO">
+	<!-- 전체 글 불러오기 -->
+	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">
+		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT 3 OFFSET 0 ;
+	</select>
 	<!-- 아티클 저장 -->
-	<insert id="saveTistoryArticle">
+	<insert id="saveArticle">
 		insert into articles set
 			title = #{param1},
     		content = #{param2},
-    		author = #{param3},
-    		originalpage = #{param4},
-    		creationdate = #{param5},
-    		site = #{param6},
-    		id = #{param7}
+    		originalpage = #{param3},
+    		creationdate = #{param4},
+    		site = #{param5},
+    		id = #{param6}
 	</insert>
 	
 	<insert id="saveLinkedinArticle">
 		insert into articles set
-			author = #{param1},
-			content = #{param2},
-			id = #{param3},
-			originalpage = #{param4},
-			site = #{param5}
-	</insert>
-	<insert id="saveCareelyArticle">
-		insert into articles set
-			title = #{param1},
-			content = #{param2},
-			author = #{param3},
+			content = #{param1},
+			originalpage = #{param2},
+			creationdate = #{param3},
 			site = #{param4},
 			id = #{param5}
+			
 	</insert>
-	<update id="updateCareelyArticle">
+
+	<update id="updateArticle">
 		UPDATE articles SET title = #{param1} , content = #{param2}, creationdate = #{param3} WHERE originalpage = #{param4} and id=#{param5};
+	</update>
+	<update id="updateLinkedinArticle">
+		UPDATE articles SET content = #{param1}, creationdate = #{param2} WHERE originalPage = #{param3} and id=#{param4};
 	</update>
 	<!-- 최신 url 불러오기 -->
 
@@ -44,9 +44,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="findArticleByIdentifier" resultType="com.toyproject.scraping.ArticleDTO">
 		select * from articles where originalpage= #{param1};
 	</select>
-	<!-- 전체 글 불러오기 -->
-	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">
-		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT 10 OFFSET 0 ;
-	</select>
+	
 	
 </mapper>

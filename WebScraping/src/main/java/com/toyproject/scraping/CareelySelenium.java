@@ -1,8 +1,7 @@
 package com.toyproject.scraping;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.openqa.selenium.By;
@@ -14,7 +13,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
 public class CareelySelenium {
 	@Autowired
 	private ArticleDAO articleDAO;
@@ -22,6 +26,8 @@ public class CareelySelenium {
 		this.articleDAO = articleDAO;
 	}
 	public void ScrapCareelySelenium() {
+		LocalDateTime now = LocalDateTime.now();
+		log.info("start");
 		// 현재 시스템의 OS 이름을 가져옵니다.
         String osName = System.getProperty("os.name").toLowerCase();
         System.out.println("Operating System: " + osName);
@@ -108,16 +114,9 @@ public class CareelySelenium {
 			    if (newHeight == lastHeight) {
 			        break; // 더 이상 로드되는 콘텐츠가 없으면 반복 종료 
 			    }
-			}
-			
-			
-			
+			}	
 			try {
-				int classCount = driver.findElements(By.cssSelector(".tw-flex.tw-justify-between.tw-items-center.tw-gap-3.tw-p-4")).size();
-				System.out.println("class Count = " + classCount);
-				classCount = classCount*2-1;
-				
-				
+				int classCount = driver.findElements(By.cssSelector(".tw-flex.tw-justify-between.tw-items-center.tw-gap-3.tw-p-4")).size();			
 				for(int divCnt = classCount; divCnt>=1; divCnt-=2) {
 					
 					WebElement div = driver.findElement(By.cssSelector("#__next > div.ThemeProvider_theme-pc__QaFwS > div.css-1yctryj-SkeletonTheme > div > div.tw-border-solid.tw-border-color-slate-200.tw-border-0.tw-border-t > div > div > div > div > div > div:nth-child("+ divCnt +") > div"));
@@ -142,19 +141,22 @@ public class CareelySelenium {
 					ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage,id);
 					if (articleDTO != null) {
 						// 기존 글 업데이트
-						articleDAO.updateCareelyArticle(title,content,date,site,id);
+						System.out.println("there is no new article");
+						articleDAO.updateArticle(title,content,date,originalPage,id);
 					} else {
 						// 새 글 삽입
-						articleDAO.saveCareelyArticle(title,content,originalPage,date,site,id);
+						System.out.println("there is a new article");
+						articleDAO.saveArticle(title,content,originalPage,date,site,id);
 					}
-					
-				    
 				}
-				
 			} catch(Exception e) {
-				System.out.println("count failure : " + e);
+				System.out.println("scrap failure : " + e);
 			}
 			driver.quit();
+			LocalDateTime later = LocalDateTime.now();
+			long millisDifference = Duration.between(now, later).toMillis();
+			log.info("end");
+			System.out.println("Careelay Scrap code took "+millisDifference+"ms");	
 		}
 		
 	}
