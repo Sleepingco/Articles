@@ -3,6 +3,7 @@ package com.toyproject.scraping;
 import java.util.ArrayList;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.json.simple.JSONArray;
 
 @Mapper
 public interface ArticleDAO {
@@ -15,6 +16,8 @@ public interface ArticleDAO {
 	
 	ArticleDTO getNewestUrl(int testId,String site);
 	ArticleDTO findArticleByIdentifier(String originalPage, int id);
-	
-	
+
+	ArrayList<DevDTO> getDevSummary();
+	ArrayList<DevDTO> getDevList();
+
 }

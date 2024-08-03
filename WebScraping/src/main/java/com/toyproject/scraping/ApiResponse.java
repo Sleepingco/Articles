@@ -1,48 +1,25 @@
 package com.toyproject.scraping;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class ApiResponse {
-    private int code;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@Getter
+@Setter
+@JsonPropertyOrder({ "code", "message", "data" })
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiResponse<T> {
+	private int code;
     private String message;
-    private JSONArray data;
+    private T data;
 
-    public ApiResponse(int code, String message, JSONArray data) {
+    public ApiResponse(int code, String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public JSONArray getData() {
-        return data;
-    }
-
-    public void setData(JSONArray data) {
-        this.data = data;
-    }
-
-    public JSONObject toJSON() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("code", this.code);
-        jsonObject.put("message", this.message);
-        jsonObject.put("data", this.data);
-        return jsonObject;
     }
 }
