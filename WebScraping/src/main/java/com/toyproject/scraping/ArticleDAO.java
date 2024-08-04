@@ -7,7 +7,7 @@ import org.json.simple.JSONArray;
 
 @Mapper
 public interface ArticleDAO {
-	ArrayList<ArticleDTO> getArticleList();
+	ArrayList<ArticleDTO> getArticleList(int limit, int offset2);
 	
 	void saveArticle(String title, String content,String originalpage,String date, String site, int id);
 	void updateArticle(String title, String content, String date, String originalPage, int id);
@@ -18,6 +18,6 @@ public interface ArticleDAO {
 	ArticleDTO findArticleByIdentifier(String originalPage, int id);
 
 	ArrayList<DevDTO> getDevSummary();
-	ArrayList<DevDTO> getDevList();
+	ArrayList<DevDTO> getDevList(int id);
 
 }

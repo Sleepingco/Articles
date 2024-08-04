@@ -113,8 +113,7 @@ public class ArticleScrapService {
         						System.out.println("Element not found at index: " + idx);
         					}
         				}catch (IOException e) {
-        			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());
-        			        
+        			        System.out.println("Failed to retrieve data from index " + idx + ": " + e.getMessage());       			        
         				} catch (Exception e) {
         					System.out.println("ErrorMessage for scrap : "+e);	
         				}

@@ -6,7 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.toyproject.scraping.ArticleDAO">
 	<!-- 전체 글 불러오기 -->
 	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">
-		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT 3 OFFSET 0 ;
+		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT #{param1} OFFSET #{param2} ;
 	</select>
 	<!-- 아티클 저장 -->
 	<insert id="saveArticle">
@@ -48,7 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select name,position,introduction,thumbsurl from writer;
 	</select>
 	<select id="getDevList" resultType="com.toyproject.scraping.DevDTO">
-		select * from writer;
+		select * from writer where id = #{param1};
 	</select>
 	
 </mapper>
