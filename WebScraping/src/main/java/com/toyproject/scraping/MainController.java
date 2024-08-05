@@ -37,9 +37,9 @@ public class MainController {
 //		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
 //		SLI.ScrapLinkedinSelenium();
 		
-		//커리어리
-		CareelySelenium CSI = new CareelySelenium(articleDAO);
-		CSI.ScrapCareelySelenium();
+//		//커리어리
+//		CareelySelenium CSI = new CareelySelenium(articleDAO);
+//		CSI.ScrapCareelySelenium();
 	}
 	
 	@SuppressWarnings("unchecked")
