@@ -33,7 +33,7 @@ public class UrlManager {
 		linkedinUrls = new HashMap<>();
 		linkedinUrls.put(1, "https://www.linkedin.com/in/%EB%8F%99%EC%9A%B1-%EC%9D%B4-575160177/recent-activity/all/");
 		linkedinUrls.put(3, "https://www.linkedin.com/in/totuworld/recent-activity/all/");
-		linkedinUrls.put(4, "https://careerly.co.kr/profiles/669213");
+		linkedinUrls.put(4, "https://www.linkedin.com/in/keeyonghan/recent-activity/all/");
 	}
     
     // 모든 이름과 URL을 Map으로 반환하기

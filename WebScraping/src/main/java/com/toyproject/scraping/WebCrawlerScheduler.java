@@ -17,7 +17,7 @@ public class WebCrawlerScheduler {
     @Autowired
     private SeleniumLinkedin seleniumLinkedin;
 
-    @Scheduled(cron = "0 0 4 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 3 * * ?", zone = "Asia/Seoul")
     public void executeTask() {
         logger.info("Task executed at 4 AM every day");
         try {

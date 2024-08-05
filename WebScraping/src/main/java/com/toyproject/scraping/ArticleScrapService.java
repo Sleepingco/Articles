@@ -1,6 +1,9 @@
 package com.toyproject.scraping;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -108,7 +111,7 @@ public class ArticleScrapService {
         		                	System.out.println("insert new article : " + idx);
         		                	articleDAO.saveArticle(title, finContent, jojolduCurUrl, creationdate, blogName, id);
         		                }
-        		                
+        		                printMemoryUsage();
         					} else {
         						System.out.println("Element not found at index: " + idx);
         					}
@@ -134,5 +137,11 @@ public class ArticleScrapService {
 			System.out.println("ErrorMessage for Connect : "+e);
 		}
 	}
+	private void printMemoryUsage() {
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
+        long usedMemory = heapMemoryUsage.getUsed() / 1024 / 1024;
+        System.out.println("Heap memory used: " + usedMemory + " MB");
+    }
 	
 }

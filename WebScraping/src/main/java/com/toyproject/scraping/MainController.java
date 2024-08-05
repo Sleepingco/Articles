@@ -25,22 +25,23 @@ public class MainController {
 	
 	@Autowired
 	private ArticleDAO articleDAO;
-//	@SuppressWarnings("unchecked")
-//	@GetMapping("/")
-//	@ResponseBody
-//	public void test() {
-//		//이동욱 티스토리
+	@SuppressWarnings("unchecked")
+	@GetMapping("/")
+	@ResponseBody
+	public void test() {
+		//이동욱 티스토리
 //		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
 //		ASS.jojolduCrawlAndSaveArticles();
 
 //		//링크드인
 //		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
 //		SLI.ScrapLinkedinSelenium();
-//		
-//		//커리어리
-//		CareelySelenium CSI = new CareelySelenium(articleDAO);
-//		CSI.ScrapCareelySelenium();
-//	}
+		
+		//커리어리
+		CareelySelenium CSI = new CareelySelenium(articleDAO);
+		CSI.ScrapCareelySelenium();
+	}
+	
 	@SuppressWarnings("unchecked")
 	@GetMapping("/articles")
 	@ResponseBody
