@@ -45,7 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select * from articles where originalpage= #{param1};
 	</select>
 	<select id="getDevSummary" resultType="com.toyproject.scraping.DevDTO">
-		select name,position,introduction,thumbsurl from writer;
+		select id,name,position,introduction,thumbsurl from writer;
 	</select>
 	<select id="getDevList" resultType="com.toyproject.scraping.DevDTO">
 		select * from writer where id = #{param1};

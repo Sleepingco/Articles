@@ -13,19 +13,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -41,138 +33,176 @@ public class SeleniumLinkedin {
 
     public void ScrapLinkedinSelenium() {
         LocalDateTime now = LocalDateTime.now();
-        log.info("start");
+        log.info("Start scraping...");
 
+        // Set ChromeDriver path based on OS
         String osName = System.getProperty("os.name").toLowerCase();
-        System.out.println("Operating System: " + osName);
+        log.info("Operating System: " + osName);
 
         if (osName.contains("win")) {
             System.setProperty("webdriver.chrome.driver", "F:\\SHP\\PersonalProject\\WebScraping\\WebScraping\\chromedriver-win64\\chromedriver.exe");
-            System.out.println("Windows ChromeDriver is set.");
         } else if (osName.contains("mac")) {
             System.setProperty("webdriver.chrome.driver", "/Users/parkseongho/git/WebScraping/WebScraping/chromedriver-mac-arm64/chromedriver");
-            System.out.println("Mac ChromeDriver is set.");
         } else if (osName.contains("linux")) {
             System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
-            System.out.println("Linux ChromeDriver is set.");
         } else {
-            System.out.println("Your OS is not supported!");
+            log.error("Unsupported OS!");
+            return;
         }
+        // scraping start
+        WebDriver driver = null;
+        try {
+        	// Setup ChromeOptions
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
+            options.addArguments("headless");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--window-size=1280,720");
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-popup-blocking");
+            options.addArguments("--disable-notifications");
+            
+            options.addArguments("--disable-gpu");
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
-        options.addArguments("headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080"); // 윈도우 사이즈 설정
+            // Initialize WebDriver
+            driver = new ChromeDriver(options);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(90)); // Reduced timeout for faster operations
 
-        WebDriver driver = new ChromeDriver(options);
+            // Hide WebDriver
+            ((JavascriptExecutor) driver).executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+            // Modify UserAgent via JavaScript
+            ((JavascriptExecutor) driver).executeScript("navigator.__defineGetter__('userAgent', function(){ return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'; })");
 
-        LinkedInLoginAutomation login = new LinkedInLoginAutomation(driver);
-        login.loginToLinkedIn();
-
-        UrlManager manager = new UrlManager();
-        Map<Integer, String> allUrls = manager.getLinkedinUrls();
-
-        int cnt = 0;
-        for (Map.Entry<Integer, String> entry : allUrls.entrySet()) {
-            String urls = entry.getValue();
-            driver.get(urls);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-
-            // 무한 스크롤 처리
-            int maxScrollAttempts = 10;
-            int scrollAttempts = 0;
-            while (scrollAttempts < maxScrollAttempts) {
-                long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
-                js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                long newHeight = (long) js.executeScript("return document.body.scrollHeight");
-                if (newHeight == lastHeight) {
-                    scrollAttempts++;
-                } else {
-                    scrollAttempts = 0;
-                }
-                printMemoryUsage();
-                
-            }
-
+            // Login to LinkedIn
             try {
-                List<WebElement> divs = driver.findElements(By.cssSelector("#fie-impression-container"));
-                Collections.reverse(divs);
-                if (divs.isEmpty()) {
-                    System.out.println("No divs found.");
-                } else {
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span > span")));
-                    for (WebElement div : divs) {
-                        scrollToElementCentered(driver, div);
-                        try {
-                            String originalPage = clickToCopyLink(driver, div, wait);
-                            String content = getContent(div) + " " + getLinkBoxSafe(driver, div);
-                            String date = "";
-                            try {
-                                date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.update-components-actor--with-control-menu.align-items-flex-start > div > div > span > span.visually-hidden")).getText();
-                            } catch (Exception e) {
-                                System.out.println("퍼온 글일 수 있습니다. 다른 선택자로 시도합니다.");
-                                try {
-                                    date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.align-items-flex-start > div > div > span > span:nth-child(1)")).getText();
-                                    content = "(퍼옴) " + content;
-                                } catch (Exception e2) {
-                                    System.out.println("두 번째 시도에서도 날짜를 찾을 수 없습니다.");
-                                }
-                            }
-                            int id = entry.getKey();
-                            String siteName = "링크드인";
-                            System.out.println("id : " + id);
-                            System.out.println("content is : " + content);
-                            System.out.println("date is : " + date);
-                            System.out.println("url is : " + originalPage);
-                            printMemoryUsage();
-                            
-                            ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage, id);
-                            if (articleDTO != null) {
-                                System.out.println("update exist article");
-                                articleDAO.updateLinkedinArticle(content, date, originalPage, id);
-                            } else {
-                                System.out.println("insert a new article");
-                                articleDAO.saveLinkedinArticle(content, originalPage, date, siteName, id);
-                            }
-                        } catch (NoSuchElementException e) {
-                            System.out.println("can't find element: " + e);
-                        }
-                        cnt++;
-                        System.out.println("count is :" + cnt);
-                    }
-                }
+                LinkedInLoginAutomation login = new LinkedInLoginAutomation(driver);
+                login.loginToLinkedIn();
             } catch (Exception e) {
-                System.err.println("An error occurred: " + e.getMessage());
-                e.printStackTrace();
+                log.error("Login failed. Maybe already logged in.", e);
+            }
+
+            // Scraping process
+            UrlManager manager = new UrlManager();
+            Map<Integer, String> allUrls = manager.getLinkedinUrls();
+
+            for (Map.Entry<Integer, String> entry : allUrls.entrySet()) {
+                String url = entry.getValue();
+                driver.get(url);
+
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container")));
+                // 무한 스크롤 처리
+                long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
+
+                while (true) {
+                    // 페이지 끝까지 스크롤
+                    js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+                    // 새로운 콘텐츠 로드를 기다림
+                    try {
+    					Thread.sleep(3000);
+    				} catch (InterruptedException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				} // 이 부분은 네트워크 속도에 따라 조정 가능
+
+                    // 새로운 스크롤 높이 계산
+                    long newHeight = (long) js.executeScript("return document.body.scrollHeight");
+
+                    // 새로운 콘텐츠가 로드되지 않았을 경우, 루프 종료
+                    if (newHeight == lastHeight) {
+                        break;
+                    }
+                    lastHeight = newHeight;
+                    log.info("down down");
+                }
+
+                try {
+                    List<WebElement> divs = driver.findElements(By.cssSelector("#fie-impression-container"));
+                    Collections.reverse(divs);
+
+                    if (divs.isEmpty()) {
+                        log.warn("No divs found.");
+                    } else {
+                        for (WebElement div : divs) {
+                            scrollToElementCentered(driver, div);
+                            try {
+                            	
+                            	try {
+                					Thread.sleep(2000);
+                				} catch (InterruptedException e) {
+                					// TODO Auto-generated catch block
+                					e.printStackTrace();
+                				} // 이 부분은 네트워크 속도에 따라 조정 가능
+                            	
+                                String originalPage = clickToCopyLink(driver, div, wait);
+                                String content = getContent(div, wait) + " " + getLinkBoxSafe(driver, div);
+                                String date = extractDate(div);
+
+                                int id = entry.getKey();
+                                String siteName = "링크드인";
+                                log.info("Processing ID: {}", id);
+
+                                ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage, id);
+                                if (articleDTO != null) {
+                                    log.info("Updating existing article...");
+                                    articleDAO.updateLinkedinArticle(content, date, originalPage, id);
+                                } else {
+                                    log.info("Inserting new article...");
+                                    articleDAO.saveLinkedinArticle(content, originalPage, date, siteName, id);
+                                }
+                            } catch (NoSuchElementException e) {
+                                log.error("Element not found, skipping to next.", e);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("An error occurred during scraping", e);
+                }
+            }
+
+            driver.quit();
+
+            LocalDateTime later = LocalDateTime.now();
+            long millisDifference = Duration.between(now, later).toMillis();
+            log.info("End of scraping process");
+            log.info("Selenium Scrap code took {} ms", millisDifference);
+        } catch (Exception e) {
+            log.error("An error occurred during the scraping process", e);
+        } finally {
+            if (driver != null) {
+                driver.quit(); // WebDriver 종료
             }
         }
-        System.out.println("total is :" + cnt);
-        driver.quit();
-
-        LocalDateTime later = LocalDateTime.now();
-        long millisDifference = Duration.between(now, later).toMillis();
-        log.info("end");
-        System.out.println("Selenium Scrap code took " + millisDifference + "ms");
+        
     }
 
-    private String getContent(WebElement div) {
+    private String getContent(WebElement div, WebDriverWait wait) {
         try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span > span")));
             String htmlContent = div.findElement(By.cssSelector("#fie-impression-container > div.feed-shared-update-v2__description-wrapper.mr2 > div > div > span > span")).getAttribute("innerHTML");
             Document doc = Jsoup.parseBodyFragment(htmlContent);
-            String content = doc.text();
-            return content;
+            return doc.text();
         } catch (NoSuchElementException e) {
-            System.out.println("컨텐츠 없음 no content");
+            log.warn("No content found.");
             return "";
         }
+    }
+
+    private String extractDate(WebElement div) {
+        String date = "";
+        try {
+            date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.update-components-actor--with-control-menu.align-items-flex-start > div > div > span > span.visually-hidden")).getText();
+        } catch (Exception e) {
+            log.warn("No date found using the first selector, trying another one.");
+            try {
+                date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.align-items-flex-start > div > div > span > span:nth-child(1)")).getText();
+            } catch (Exception e2) {
+                log.warn("Failed to extract date using both selectors.");
+            }
+        }
+        return date;
     }
 
     public void scrollToElementCentered(WebDriver driver, WebElement element) {
@@ -181,17 +211,16 @@ public class SeleniumLinkedin {
             "const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);" +
             "const elementTop = arguments[0].getBoundingClientRect().top;" +
             "const offset = elementTop - viewPortHeight / 2;" +
-            "window.scroll({top: window.pageYOffset + offset, behavior: 'smooth'});",
-            element);
+            "window.scroll({top: window.pageYOffset + offset});", element);
     }
 
     private String getLinkBoxSafe(WebDriver driver, WebElement div) {
         try {
             WebElement contentLinkBox = div.findElement(By.cssSelector("#fie-impression-container > article > div"));
-            System.out.println("컨텐츠 내부에 링크 박스를 알아내기 성공");
+            log.debug("Successfully found link box inside content.");
             return contentLinkBox.findElement(By.tagName("a")).getAttribute("href");
         } catch (NoSuchElementException e) {
-            System.out.println("링크박스 없음 no link box");
+            log.warn("No link box found.");
             return "";
         }
     }
@@ -204,14 +233,8 @@ public class SeleniumLinkedin {
             wait.until(ExpectedConditions.visibilityOf(button));
             wait.until(ExpectedConditions.elementToBeClickable(button)).click();
             
-            // 추가 대기 시간 설정
-            Thread.sleep(1000);
-            
             WebElement linkShare = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".feed-shared-control-menu__item.option-share-via")));
             linkShare.click();
-            
-            // 추가 대기 시간 설정
-            Thread.sleep(1000);
             
             WebElement shareBox = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.artdeco-toast-item__cta")));
             originalPage = shareBox.getAttribute("href");
@@ -219,17 +242,9 @@ public class SeleniumLinkedin {
             WebElement closeBox = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".artdeco-toast-item__dismiss.artdeco-button.artdeco-button--circle.artdeco-button--muted.artdeco-button--1.artdeco-button--tertiary.ember-view")));
             closeBox.click();
         } catch (Exception e) {
-            System.out.println("original Link copy fail : " + e.getMessage());
+            log.error("Failed to copy original link", e);
         }
         return originalPage;
     }
-
-    private void printMemoryUsage() {
-        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-        MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long usedMemory = heapMemoryUsage.getUsed() / 1024 / 1024;
-        System.out.println("Heap memory used: " + usedMemory + " MB");
-    }
-
-
 }
+

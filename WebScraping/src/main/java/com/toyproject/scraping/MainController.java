@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,16 +27,18 @@ public class MainController {
 	@Autowired
 	private ArticleDAO articleDAO;
 	@SuppressWarnings("unchecked")
-	@GetMapping("/")
+	@GetMapping("/testforscrap")
 	@ResponseBody
+	@Operation(summary = "아티클 전체 스크랩(누르지마세요)", description = "아직 최적화중 누를시 스크랩이 오래걸림")
+    
 	public void test() {
 		//이동욱 티스토리
 //		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
 //		ASS.jojolduCrawlAndSaveArticles();
 
 //		//링크드인
-//		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
-//		SLI.ScrapLinkedinSelenium();
+		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
+		SLI.ScrapLinkedinSelenium();
 		
 //		//커리어리
 //		CareelySelenium CSI = new CareelySelenium(articleDAO);
@@ -47,7 +50,7 @@ public class MainController {
 	@ResponseBody
     @Operation(summary = "아티클 전체 불러오기", description = "주어진 offset과 limit을 사용하여 아티클을 불러옵니다.",
     parameters = {
-        @Parameter(name = "offset", description = "시작 위치", required = true, example = "0"),
+        @Parameter(name = "offset", description = "인덱스 시작 위치", required = true, example = "0"),
         @Parameter(name = "limit", description = "한 번에 불러올 아티클 수", required = true, example = "10")
     })
 	public ResponseEntity<ApiResponse<JSONArray>> articles(HttpServletRequest req) {
