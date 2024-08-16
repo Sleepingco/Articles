@@ -6,8 +6,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.toyproject.scraping.ArticleDAO">
 	<!-- 전체 글 불러오기 -->
 	<select id="getArticleList" resultType="com.toyproject.scraping.ArticleDTO">
-		select a.title , a.content,a.originalpage,a.creationdate,a.site, a.id,  b.name from articles a inner join writer b on a.id = b.id order by postnum desc LIMIT #{param1} OFFSET #{param2} ;
+	    SELECT a.title, a.content, a.originalpage, a.creationdate, a.site, a.id, b.name, b.thumbsurl
+	    FROM articles a
+	    INNER JOIN writer b ON a.id = b.id
+	    WHERE 1=1
+	    <if test="site != null and site.size() > 0">
+	        AND a.site IN 
+	        <foreach item="item" collection="site" open="(" separator="," close=")">
+	            #{item}
+	        </foreach>
+	    </if>
+	    <if test="title != null and title != ''">
+	        AND a.title LIKE CONCAT('%', #{title}, '%')
+	    </if>
+	    <if test="content != null and content != ''">
+	        AND a.content LIKE CONCAT('%', #{content}, '%')
+	    </if>
+	    <if test="writer!= null and writer != ''">
+	        AND b.name LIKE CONCAT('%', #{writer}, '%')
+	    </if>
+	    ORDER BY a.creationdate DESC
+	    LIMIT #{limit} OFFSET #{offset}
 	</select>
+
 	<!-- 아티클 저장 -->
 	<insert id="saveArticle">
 		insert into articles set
@@ -44,9 +65,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="findArticleByIdentifier" resultType="com.toyproject.scraping.ArticleDTO">
 		select * from articles where originalpage= #{param1};
 	</select>
+	
 	<select id="getDevSummary" resultType="com.toyproject.scraping.DevDTO">
 		select id,name,position,introduction,thumbsurl from writer;
 	</select>
+	
 	<select id="getDevList" resultType="com.toyproject.scraping.DevDTO">
 		select * from writer where id = #{param1};
 	</select>

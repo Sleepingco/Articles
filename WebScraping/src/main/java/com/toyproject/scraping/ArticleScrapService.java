@@ -5,7 +5,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -97,21 +99,22 @@ public class ArticleScrapService {
         			            }
         			                    
         			            // 작성일자
-        						Element creationdateDiv = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > span.meta > span.date");
+        						String inputDate = jojolduDocuments.selectFirst("#content > div > div.post-cover > div > span.meta > span.date").text();
         						// text 추출
         		            	String title = titleDiv.text();
         		            	String finContent = processedContent.toString();
-        		                String creationdate = creationdateDiv.text();
+        		                String creationDate = convertDateFormat(inputDate);
+        		                System.out.println(creationDate);
         		                String blogName = "티스토리";
         		                int id = 1;
         		                if(idx<=jojolduLatestUrlIdxInt) {
         		                	System.out.println("update exist article : " + idx);
-        		                	articleDAO.updateArticle(title,finContent,creationdate,jojolduCurUrl,id);
+        		                	articleDAO.updateArticle(title,finContent,creationDate,jojolduCurUrl,id);
         		                } else {
         		                	System.out.println("insert new article : " + idx);
-        		                	articleDAO.saveArticle(title, finContent, jojolduCurUrl, creationdate, blogName, id);
+        		                	articleDAO.saveArticle(title, finContent, jojolduCurUrl, creationDate, blogName, id);
         		                }
-        		                printMemoryUsage();
+        		                
         					} else {
         						System.out.println("Element not found at index: " + idx);
         					}
@@ -137,11 +140,24 @@ public class ArticleScrapService {
 			System.out.println("ErrorMessage for Connect : "+e);
 		}
 	}
-	private void printMemoryUsage() {
-        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-        MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
-        long usedMemory = heapMemoryUsage.getUsed() / 1024 / 1024;
-        System.out.println("Heap memory used: " + usedMemory + " MB");
-    }
+	
+	 public static String convertDateFormat(String inputDate) {
+	        // 입력된 문자열에서 공백을 제거하고, 마지막 점을 제거합니다.
+	        String trimmedInput = inputDate.trim();
+	        if (trimmedInput.endsWith(".")) {
+	            trimmedInput = trimmedInput.substring(0, trimmedInput.length() - 1);
+	        }
+	        
+	        // 파싱을 위한 포매터 설정
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy. M. d");
+	        // 출력을 위한 포매터 설정
+	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy.M.d");
+
+	        // 날짜 파싱
+	        LocalDate date = LocalDate.parse(trimmedInput, inputFormatter);
+
+	        // 변환된 형식 반환
+	        return date.format(outputFormatter);
+	    }
 	
 }

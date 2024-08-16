@@ -1,13 +1,22 @@
 package com.toyproject.scraping;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.json.simple.JSONArray;
 
 @Mapper
 public interface ArticleDAO {
-	ArrayList<ArticleDTO> getArticleList(int limit, int offset2);
+	public ArrayList<ArticleDTO> getArticleList(
+	        @Param("site") List<String> siteList, 
+	        @Param("title") String title, 
+	        @Param("content") String content, 
+	        @Param("limit") int limit, 
+	        @Param("offset") int offset, 
+	        @Param("writer")String writer);
+
 	
 	void saveArticle(String title, String content,String originalpage,String date, String site, int id);
 	void updateArticle(String title, String content, String date, String originalPage, int id);

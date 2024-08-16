@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -90,33 +91,33 @@ public class SeleniumLinkedin {
                 String url = entry.getValue();
                 driver.get(url);
 
-                JavascriptExecutor js = (JavascriptExecutor) driver;
+//                JavascriptExecutor js = (JavascriptExecutor) driver;
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#fie-impression-container")));
                 // 무한 스크롤 처리
-                long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
-
-                while (true) {
-                    // 페이지 끝까지 스크롤
-                    js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-
-                    // 새로운 콘텐츠 로드를 기다림
-                    try {
-    					Thread.sleep(3000);
-    				} catch (InterruptedException e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
-    				} // 이 부분은 네트워크 속도에 따라 조정 가능
-
-                    // 새로운 스크롤 높이 계산
-                    long newHeight = (long) js.executeScript("return document.body.scrollHeight");
-
-                    // 새로운 콘텐츠가 로드되지 않았을 경우, 루프 종료
-                    if (newHeight == lastHeight) {
-                        break;
-                    }
-                    lastHeight = newHeight;
-                    log.info("down down");
-                }
+//                long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
+//
+//                while (true) {
+//                    // 페이지 끝까지 스크롤
+//                    js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+//
+//                    // 새로운 콘텐츠 로드를 기다림
+//                    try {
+//    					Thread.sleep(3000);
+//    				} catch (InterruptedException e) {
+//    					// TODO Auto-generated catch block
+//    					e.printStackTrace();
+//    				} // 이 부분은 네트워크 속도에 따라 조정 가능
+//
+//                    // 새로운 스크롤 높이 계산
+//                    long newHeight = (long) js.executeScript("return document.body.scrollHeight");
+//
+//                    // 새로운 콘텐츠가 로드되지 않았을 경우, 루프 종료
+//                    if (newHeight == lastHeight) {
+//                        break;
+//                    }
+//                    lastHeight = newHeight;
+//                    log.info("down down");
+//                }
 
                 try {
                     List<WebElement> divs = driver.findElements(By.cssSelector("#fie-impression-container"));
@@ -136,9 +137,24 @@ public class SeleniumLinkedin {
                 					e.printStackTrace();
                 				} // 이 부분은 네트워크 속도에 따라 조정 가능
                             	
-                                String originalPage = clickToCopyLink(driver, div, wait);
-                                String content = getContent(div, wait) + " " + getLinkBoxSafe(driver, div);
-                                String date = extractDate(div);
+                            	String originalPage = clickToCopyLink(driver, div, wait);
+                                String content = getContent(div,wait) + " " + getLinkBoxSafe(driver, div);
+                                String date = "";
+                                try {
+                                    date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.update-components-actor--with-control-menu > div > div > a.app-aware-link.update-components-actor__sub-description-link > span > span.visually-hidden")).getText();
+                                    date = formatRelativeDateTime(date);
+                                    System.out.println("date:"+date);
+                                } catch (Exception e) {
+                                	log.warn("퍼온 글일 수 있습니다. 다른 선택자로 시도합니다."+e);
+                                    try {
+                                        date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex > div > div > a.app-aware-link.update-components-actor__sub-description-link > span > span.visually-hidden")).getText();
+                                        date = formatRelativeDateTime(date);
+                                        System.out.println("date:"+date);
+                                        content = "(퍼옴) " + content;
+                                    } catch (Exception e2) {
+                                    	log.warn("두 번째 시도에서도 날짜를 찾을 수 없습니다."+e2);
+                                    }
+                                }
 
                                 int id = entry.getKey();
                                 String siteName = "링크드인";
@@ -161,8 +177,6 @@ public class SeleniumLinkedin {
                     log.error("An error occurred during scraping", e);
                 }
             }
-
-            driver.quit();
 
             LocalDateTime later = LocalDateTime.now();
             long millisDifference = Duration.between(now, later).toMillis();
@@ -188,21 +202,6 @@ public class SeleniumLinkedin {
             log.warn("No content found.");
             return "";
         }
-    }
-
-    private String extractDate(WebElement div) {
-        String date = "";
-        try {
-            date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.update-components-actor--with-control-menu.align-items-flex-start > div > div > span > span.visually-hidden")).getText();
-        } catch (Exception e) {
-            log.warn("No date found using the first selector, trying another one.");
-            try {
-                date = div.findElement(By.cssSelector("#fie-impression-container > div.relative > div.update-components-actor.display-flex.align-items-flex-start > div > div > span > span:nth-child(1)")).getText();
-            } catch (Exception e2) {
-                log.warn("Failed to extract date using both selectors.");
-            }
-        }
-        return date;
     }
 
     public void scrollToElementCentered(WebDriver driver, WebElement element) {
@@ -246,5 +245,46 @@ public class SeleniumLinkedin {
         }
         return originalPage;
     }
+    
+    public static String formatRelativeDateTime(String input) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.M.d"); // 날짜만 출력하는 포맷
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            if (input.contains("분 전")) {
+                int minutes = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusMinutes(minutes);
+                return resultDateTime.format(formatter);
+            } else if (input.contains("시간 전")) {
+                int hours = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusHours(hours);
+                return resultDateTime.format(formatter);
+            } else if (input.contains("일 전")) {
+                int days = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusDays(days);
+                return resultDateTime.format(formatter);
+            } else if (input.contains("주 전")) {
+                int weeks = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusWeeks(weeks);
+                return resultDateTime.format(formatter);
+            } else if (input.contains("개월 전")) {
+                int months = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusMonths(months);
+                return resultDateTime.format(formatter);
+            } else if (input.contains("년 전")) {
+                int years = Integer.parseInt(input.replaceAll("[^0-9]", ""));
+                LocalDateTime resultDateTime = now.minusYears(years);
+                return resultDateTime.format(formatter);
+            } 
+        } catch (NumberFormatException e) {
+            // 숫자 변환 실패 시 로그를 남김
+            System.err.println("날짜 변환 중 오류 발생: " + input);
+            e.printStackTrace();
+            return "Invalid date format";
+        }
+
+        return "Invalid date format"; // 입력이 인식되지 않은 경우
+    }
+
 }
 

@@ -6,7 +6,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import org.openqa.selenium.By;
@@ -124,13 +127,7 @@ public class CareelySelenium {
                         String title = null;
                         String date = null;
                         String originalPage = null;
-                        try {
-        					Thread.sleep(2000);
-        				} catch (InterruptedException e) {
-        					// TODO Auto-generated catch block
-        					e.printStackTrace();
-        				} // 이 부분은 네트워크 속도에 따라 조정 가능
-                    	
+                      
                         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", div);
                         // 더보기 클릭
                         try {
@@ -155,29 +152,29 @@ public class CareelySelenium {
                         }
                         try {
                             content += div.findElement(By.cssSelector(".ProseMirror.auto-line-break.tw-text-base.tw-text-color-slate-900.tw-whitespace-pre-wrap")).getText();
-                            date = div.findElement(By.cssSelector(".tw-text-xs.tw-text-color-text-subtler")).getText();
+                            String rawDate = div.findElement(By.cssSelector(".tw-text-xs.tw-text-color-text-subtler")).getText();
+                            
+                            date = standardizeDate(rawDate);
                             originalPage = div.findElement(By.cssSelector(".tw-p-3.tw-flex.tw-flex-wrap.tw-justify-end.false")).getAttribute("href");
                         } catch (NoSuchElementException e) {
                             System.out.println("퍼온 글일 수 있습니다. 다른 선택자로 시도합니다.");
                         } finally {                       
                             try {
-                                Thread.sleep(500);
+                                Thread.sleep(1000);
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                                 System.err.println("Thread interrupted: " + e.getMessage());
                             }
-
+                            log.info("Processing ID: {}", id);
                             System.out.println("제목 : " + title);
-                            System.out.println("컨텐츠 : " + content);
-                            System.out.println("작성일 : " + date);
-                            System.out.println("사이트 : " + originalPage);
-
+                            System.out.println("date : " + date);
+                            
                             ArticleDTO articleDTO = articleDAO.findArticleByIdentifier(originalPage, id);
                             if (articleDTO != null) {
-                                System.out.println("there is no new article");
+                            	log.info("Updating existing article...");
                                 articleDAO.updateArticle(title, content, date, originalPage, id);
                             } else {
-                                System.out.println("there is a new article");
+                            	log.info("Inserting new article...");
                                 articleDAO.saveArticle(title, content, originalPage, date, site, id);
                             }
                         }
@@ -197,8 +194,39 @@ public class CareelySelenium {
                 driver.quit(); // WebDriver 종료
             }
         }
-        
-
     }
+    
+    
+
+    public static String standardizeDate(String inputDate) {
+    	DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일"); // 입력용 포매터
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy.M.d"); // 출력용 포매터
+        LocalDate date;
+        
+        try {
+            // "일전"과 같은 상대적 날짜 파싱
+            if (inputDate.contains("일 전")) {
+                String daysString = inputDate.replaceAll("[^0-9]", ""); // 숫자만 추출
+                int daysBefore = Integer.parseInt(daysString); // 문자열을 정수로 변환
+                date = LocalDate.now().minus(daysBefore, ChronoUnit.DAYS);
+            } else if (inputDate.contains("시간 전")) {
+                // "시간전" 입력은 날짜 변경 없이 현재 날짜를 유지
+                date = LocalDate.now();
+            } else {
+                // 입력된 날짜 문자열에 "년"이 없는 경우 현재 년도 추가
+                if (!inputDate.contains("년")) {
+                    inputDate = LocalDate.now().getYear() + "년 " + inputDate;
+                }
+                // 날짜 파싱
+                date = LocalDate.parse(inputDate, inputFormatter);
+            }
+            
+            return date.format(outputFormatter);
+        } catch (Exception e) {
+            return "Invalid date format: " + e.getMessage(); // 오류 메시지 개선
+        }
+    }
+
+    
 
 }

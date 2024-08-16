@@ -17,12 +17,16 @@ public class WebCrawlerScheduler {
     @Autowired
     private SeleniumLinkedin seleniumLinkedin;
 
+    @Autowired
+    private CareelySelenium careelySelenium;
+    
     @Scheduled(cron = "0 0 3 * * ?", zone = "Asia/Seoul")
     public void executeTask() {
         logger.info("Task executed at 4 AM every day");
         try {
             articleScrapService.jojolduCrawlAndSaveArticles();
             seleniumLinkedin.ScrapLinkedinSelenium();
+            careelySelenium.ScrapCareelySelenium();
         } catch (Exception e) {
             logger.error("Error during scheduled tasks", e);
         }

@@ -13,4 +13,9 @@ public class ArticleDTO {
 	String site;
 	String name;
 	int id;
+	String position;
+	String introduction;
+	String link;
+	String career;
+	String thumbsurl;
 }
