@@ -25,8 +25,9 @@ public class WebCrawlerScheduler {
         logger.info("Task executed at 4 AM every day");
         try {
             articleScrapService.jojolduCrawlAndSaveArticles();
-            seleniumLinkedin.ScrapLinkedinSelenium();
             careelySelenium.ScrapCareelySelenium();
+//            seleniumLinkedin.ScrapLinkedinSelenium();
+            
         } catch (Exception e) {
             logger.error("Error during scheduled tasks", e);
         }

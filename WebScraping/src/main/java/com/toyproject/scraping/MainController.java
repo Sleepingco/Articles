@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,15 +24,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 
 @Controller
+
 public class MainController {
 	//http://localhost:8080/swagger-ui/index.html#
-	
+
 	@Autowired
 	private ArticleDAO articleDAO;
 	@SuppressWarnings("unchecked")
 	@GetMapping("/testforscrap")
 	@ResponseBody
-	@Operation(summary = "아티클 전체 스크랩(누르지마세요)", description = "아직 최적화중 누를시 스크랩이 오래걸림")
+	@Operation(summary = "아티클 전체 스크랩(막음)", description = "아직 최적화중 누를시 스크랩이 오래걸림")
     
 	public void test() {
 //		//이동욱 티스토리
@@ -39,8 +41,8 @@ public class MainController {
 //		ASS.jojolduCrawlAndSaveArticles();
 
 		//링크드인
-		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
-		SLI.ScrapLinkedinSelenium();
+//		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
+//		SLI.ScrapLinkedinSelenium();
 		
 		//커리어리
 //		CareelySelenium CSI = new CareelySelenium(articleDAO);
@@ -118,11 +120,11 @@ public class MainController {
 				JSONObject jo = new JSONObject();
 				jo.put("title", alBoard.get(i).getTitle());
 				jo.put("content", alBoard.get(i).getContent());
-				jo.put("creationdate", alBoard.get(i).getCreationdate());
+				jo.put("creationDate", alBoard.get(i).getCreationdate());
 				jo.put("site", alBoard.get(i).getSite());
 				jo.put("id", alBoard.get(i).getId());
 				jo.put("name", alBoard.get(i).getName());
-				jo.put("thumbsurl", alBoard.get(i).getThumbsurl());
+				jo.put("thumbsUrl", alBoard.get(i).getThumbsurl());
 				ja.add(jo);
 			}
 			
@@ -151,7 +153,7 @@ public class MainController {
             for (int i = 0; i < alDev.size(); i++) {
                 JSONObject jo = new JSONObject();
                 jo.put("id", alDev.get(i).getId());
-                jo.put("thumbsurl", alDev.get(i).getThumbsurl());
+                jo.put("thumbsUrl", alDev.get(i).getThumbsurl());
                 jo.put("name", alDev.get(i).getName());
                 jo.put("position", alDev.get(i).getPosition());
                 jo.put("introduction", alDev.get(i).getIntroduction());
@@ -188,13 +190,13 @@ public class MainController {
 			try{
 				for(int i =0; i<alDev.size();i++) {
 					JSONObject jo = new JSONObject();
-					jo.put("id",alDev.get(i).getId());
-					jo.put("name",alDev.get(i).getName());
-					jo.put("position",alDev.get(i).getPosition());
-					jo.put("introduction",alDev.get(i).getIntroduction());
-					jo.put("link",(JSONArray) parser.parse(alDev.get(i).getLink()));
-					jo.put("career",(JSONArray) parser.parse(alDev.get(i).getCareer()));
-					jo.put("thumbsurl",alDev.get(i).getThumbsurl());
+					jo.put("id", alDev.get(i).getId());
+					jo.put("name", alDev.get(i).getName());
+					jo.put("position", alDev.get(i).getPosition());
+					jo.put("introduction", alDev.get(i).getIntroduction());
+					jo.put("platformLink", (JSONArray) parser.parse(alDev.get(i).getLink()));
+					jo.put("career", (JSONArray) parser.parse(alDev.get(i).getCareer()));
+					jo.put("thumbsUrl", alDev.get(i).getThumbsurl());
 					ja.add(jo);
 				}
 			}catch (ParseException e) {

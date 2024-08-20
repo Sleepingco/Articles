@@ -25,7 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	    <if test="writer!= null and writer != ''">
 	        AND b.name LIKE CONCAT('%', #{writer}, '%')
 	    </if>
-	    ORDER BY a.creationdate DESC
+	    ORDER BY STR_TO_DATE(a.creationdate, '%Y. %m. %d.') deSC
 	    LIMIT #{limit} OFFSET #{offset}
 	</select>
 
