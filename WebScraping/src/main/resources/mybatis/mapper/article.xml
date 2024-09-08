@@ -16,14 +16,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	            #{item}
 	        </foreach>
 	    </if>
-	    <if test="title != null and title != ''">
+	   <!--  <if test="title != null and title != ''">
 	        AND a.title LIKE CONCAT('%', #{title}, '%')
 	    </if>
 	    <if test="content != null and content != ''">
 	        AND a.content LIKE CONCAT('%', #{content}, '%')
+	    </if> -->
+	       
+	    <if test="filter != null and filter != ''">
+	        AND (
+	            a.title LIKE CONCAT('%', #{filter}, '%')
+	            OR a.content LIKE CONCAT('%', #{filter}, '%')
+	        )
 	    </if>
-	    <if test="writer!= null and writer != ''">
-	        AND b.name LIKE CONCAT('%', #{writer}, '%')
+	    
+	    <!-- 리스트 id 처리 -->
+	    <if test="idList != null and idList.size() > 0">
+	        AND a.id IN
+	        <foreach item="item" collection="idList" open="(" separator="," close=")">
+	            #{item}
+	        </foreach>
 	    </if>
 	    ORDER BY STR_TO_DATE(a.creationdate, '%Y. %m. %d.') deSC
 	    LIMIT #{limit} OFFSET #{offset}

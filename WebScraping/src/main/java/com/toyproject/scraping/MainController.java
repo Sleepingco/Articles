@@ -39,14 +39,14 @@ public class MainController {
 //		//이동욱 티스토리
 //		ArticleScrapService ASS = new ArticleScrapService(articleDAO);
 //		ASS.jojolduCrawlAndSaveArticles();
-
-		//링크드인
+//
+//		//링크드인
 //		SeleniumLinkedin SLI = new SeleniumLinkedin(articleDAO);
 //		SLI.ScrapLinkedinSelenium();
 		
 		//커리어리
-//		CareelySelenium CSI = new CareelySelenium(articleDAO);
-//		CSI.ScrapCareelySelenium();
+		CareelySelenium CSI = new CareelySelenium(articleDAO);
+		CSI.ScrapCareelySelenium();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -56,10 +56,10 @@ public class MainController {
     parameters = {
         @Parameter(name = "offset", description = "인덱스 시작 위치", required = true, example = "0"),
         @Parameter(name = "limit", description = "한 번에 불러올 아티클 수", required = true, example = "10"),
-        @Parameter(name = "site", description = "사이트", required = false, example = "커리어리,티스토리,링크드인"),
-        @Parameter(name = "title", description = "제목(제목이 없는 경우도 있음)", required = false, example = ""),
-        @Parameter(name = "content", description = "내용", required = false, example = ""),
-        @Parameter(name = "writer", description = "작성자", required = false, example = "")
+        @Parameter(name = "site", description = "사이트", required = false, example = "커리어리,티스토리"),
+        @Parameter(name = "filter", description = "제목,내용", required = false, example = ""),
+//        @Parameter(name = "content", description = "내용", required = false, example = ""),
+        @Parameter(name = "id", description = "작성자", required = false, example = "")
     })
 	public ResponseEntity<ApiResponse<JSONArray>> articles(HttpServletRequest req) {
 		// 아티클 전체 불러오기
@@ -68,10 +68,13 @@ public class MainController {
 			String limitParam = req.getParameter("limit");
 			int offset = offsetParam != null ? Integer.parseInt(offsetParam) : 0;
 	        int limit = limitParam != null ? Integer.parseInt(limitParam) : 10;
-	        String siteInput = req.getParameter("site");
-	        
+	        if (offset < 0 || limit < 0) {
+	            return ResponseEntity.badRequest().body(new ApiResponse<>(500, "Internal Server Error", null));
+	        }
+
+	        String siteInput = req.getParameter("site");	        
 	        // site가 여러 개의 값으로 들어올 수 있으므로 이를 처리
-	        String[] validSites = {"링크드인", "커리어리", "티스토리"};
+	        String[] validSites = {"커리어리", "티스토리"};
 	        List<String> siteList = new ArrayList<>();
 
 	        // site 값이 여러 개의 콤마로 구분되어 있을 경우 처리
@@ -101,16 +104,34 @@ public class MainController {
 		        }
 	        }
 	        
-	        String title = req.getParameter("title");
-	        String content = req.getParameter("content");
-	        String writer = req.getParameter("writer");
-
-	        if (offset < 0 || limit < 0) {
-	            return ResponseEntity.badRequest().body(new ApiResponse<>(500, "Internal Server Error", null));
-	        }
-
+//	        String title = req.getParameter("title");
+//	        String content = req.getParameter("content");
+	        String filter = req.getParameter("filter");
+	        String idInput = req.getParameter("id");
+	        int[] validId= {1,2,3,4};
 	        
-			ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList(siteList, title, content, limit, offset, writer);;
+	        List<Integer> idList = new ArrayList<>();
+	        if(idInput != null && !siteInput.isEmpty()) {
+	        	String[] idFromParamStr = idInput.split(",");
+	        	int[] intArray = new int[idFromParamStr.length];
+	        	for (int i=0;i<idFromParamStr.length;i++) {
+	        		intArray[i] = Integer.parseInt(idFromParamStr[i]);
+	        		
+	        	}
+	        	for(int i: intArray) {
+	        		boolean found =false;
+	        		for(int id : validId) {
+	        			if(id==i) {
+	        				found = true;
+	        				break;
+	        			}
+	        		}
+	        		if(found) {
+	        			idList.add(i);
+	        		}
+	        	}
+	        }
+			ArrayList<ArticleDTO> alBoard=articleDAO.getArticleList(siteList, filter, limit, offset, idList);;
 			if (alBoard.isEmpty()) {
                 ApiResponse<JSONArray> response = new ApiResponse<>(204, "No Content", null);
                 return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
@@ -125,6 +146,7 @@ public class MainController {
 				jo.put("id", alBoard.get(i).getId());
 				jo.put("name", alBoard.get(i).getName());
 				jo.put("thumbsUrl", alBoard.get(i).getThumbsurl());
+				jo.put("originalPage", alBoard.get(i).getOriginalpage());
 				ja.add(jo);
 			}
 			
@@ -168,6 +190,7 @@ public class MainController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+	
 	// 개발자 상세 프로필
 	@SuppressWarnings("unchecked")
 	@GetMapping("/developers")
@@ -180,6 +203,7 @@ public class MainController {
 		try {
 			String idStr = req.getParameter("id");
 			int id = Integer.parseInt(idStr);
+			System.out.println(id);
 			ArrayList<DevDTO> alDev = articleDAO.getDevList(id);
 			if (alDev.isEmpty()) {
                 ApiResponse<JSONArray> response = new ApiResponse<>(204, "No Content", null);

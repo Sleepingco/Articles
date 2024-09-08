@@ -209,6 +209,8 @@ public class CareelySelenium {
                 String daysString = inputDate.replaceAll("[^0-9]", ""); // 숫자만 추출
                 int daysBefore = Integer.parseInt(daysString); // 문자열을 정수로 변환
                 date = LocalDate.now().minus(daysBefore, ChronoUnit.DAYS);
+            } else if (inputDate.contains("하루 전")) {
+            	date = LocalDate.now().minus(1, ChronoUnit.DAYS);
             } else if (inputDate.contains("시간 전")) {
                 // "시간전" 입력은 날짜 변경 없이 현재 날짜를 유지
                 date = LocalDate.now();

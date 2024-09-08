@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration    // 스프링 실행시 설정파일 읽어드리기 위한 어노테이션
 public class SwaggerConfig {
-	//http://localhost:8080/swagger-ui/index.html#
+    //http://localhost:8080/swagger-ui/index.html#
     @Bean
-    public OpenAPI openAPI() {
+    OpenAPI openAPI() {
         return new OpenAPI()
                 .components(new Components())
                 .info(apiInfo());

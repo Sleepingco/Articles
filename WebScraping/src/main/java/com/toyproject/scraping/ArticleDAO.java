@@ -11,11 +11,12 @@ import org.json.simple.JSONArray;
 public interface ArticleDAO {
 	public ArrayList<ArticleDTO> getArticleList(
 	        @Param("site") List<String> siteList, 
-	        @Param("title") String title, 
-	        @Param("content") String content, 
+//	        @Param("title") String title, 
+//	        @Param("content") String content, 
+	        @Param("filter") String filter,
 	        @Param("limit") int limit, 
 	        @Param("offset") int offset, 
-	        @Param("writer")String writer);
+	        @Param("idList") List<Integer> idList);
 
 	
 	void saveArticle(String title, String content,String originalpage,String date, String site, int id);
