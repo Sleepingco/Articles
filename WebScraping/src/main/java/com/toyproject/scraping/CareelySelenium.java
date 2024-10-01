@@ -59,7 +59,7 @@ public class CareelySelenium {
         try {
         	ChromeOptions options = new ChromeOptions();
             options.addArguments("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36");
-//            options.addArguments("headless");
+            options.addArguments("headless");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--window-size=1920,1080");
